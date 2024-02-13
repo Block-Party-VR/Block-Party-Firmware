@@ -1,4 +1,4 @@
-22643238111139469
+22648361275751328
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -55054,6 +55054,13 @@ One digit LED 7 segment SA39-11 SC39-11 SA39-12 SC39-12
 0
 10
 10
+ESP32-S3-DEVKITC-1-N8R2
+XCVR_ESP32-S3-DEVKITC-1-N8R2
+
+
+0
+44
+44
 Ferrite_THT
 LairdTech_28C0236-0JW-10
 Ferrite, vertical, LairdTech 28C0236-0JW-10, https://assets.lairdtech.com/home/brandworld/files/28C0236-0JW-10.pdf, JW Miller core https://www.bourns.com/products/magnetic-products/j.w.-miller-through-hole-ferrite-beads-emi-filters
@@ -82600,6 +82607,13 @@ Bottom Block Connector
 12
 5
 Quinn_lib
+Top Block Connector
+
+
+0
+4
+4
+Quinn_lib
 XL-1615RGBC-WS2812B
 
 
@@ -92273,6 +92287,13 @@ igbt diode module
 0
 25
 25
+UJC-HP-3-SMT-TR
+CUI_UJC-HP-3-SMT-TR
+
+
+0
+10
+10
 Valve
 Valve_ECC-83-1
 Valve ECC-83-1 round pins
