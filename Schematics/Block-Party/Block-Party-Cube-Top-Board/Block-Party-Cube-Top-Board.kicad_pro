@@ -112,7 +112,7 @@
         "min_hole_to_hole": 0.25,
         "min_microvia_diameter": 0.19999999999999998,
         "min_microvia_drill": 0.09999999999999999,
-        "min_resolved_spokes": 1,
+        "min_resolved_spokes": 2,
         "min_silk_clearance": 0.0,
         "min_text_height": 0.7999999999999999,
         "min_text_thickness": 0.08,
@@ -392,7 +392,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "Block-Party-Main-Board.kicad_pro",
+    "filename": "Block-Party-Cube-Top-Board.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -428,7 +428,7 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "../PCB Models/Block-Party-Main-Board.step",
+      "step": "Block-Party-Cube-Top-Board.step",
       "vrml": ""
     },
     "page_layout_descr_file": ""
@@ -469,7 +469,7 @@
   },
   "sheets": [
     [
-      "4100c4a7-2a4e-4286-a196-244fb7659f20",
+      "1e9bcb59-abda-4050-8555-8eda44a8099c",
       ""
     ]
   ],
