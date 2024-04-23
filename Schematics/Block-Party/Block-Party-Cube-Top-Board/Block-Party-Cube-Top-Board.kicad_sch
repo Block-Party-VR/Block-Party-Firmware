@@ -1013,7 +1013,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "4328"
+		(property "Value" "BM04B-SRSS-TB(LF)(SN) "
 			(at 181.61 83.8199 0)
 			(effects
 				(font
@@ -1041,7 +1041,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "BM04B-SRSS-TB(LF)(SN) "
 			(at 173.99 83.82 0)
 			(effects
 				(font
@@ -1170,7 +1170,7 @@
 				(hide yes)
 			)
 		)
-		(property "MANUFACTURER" "Adafruit"
+		(property "MANUFACTURER" "JST"
 			(at 173.99 83.82 0)
 			(effects
 				(font

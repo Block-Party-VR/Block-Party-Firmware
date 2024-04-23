@@ -2030,7 +2030,7 @@
 				)
 			)
 		)
-		(property "Value" "YTC-A1001LF-04A"
+		(property "Value" "BM04B-SRSS-TB"
 			(at 135.89 123.19 0)
 			(effects
 				(font
@@ -2186,7 +2186,7 @@
 				(hide yes)
 			)
 		)
-		(property "MANUFACTURER" "YIYUAN"
+		(property "MANUFACTURER" "JST"
 			(at 135.89 133.35 0)
 			(effects
 				(font
@@ -2196,7 +2196,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer_Part_Number" "YTC-A1001LF-04A"
+		(property "Manufacturer_Part_Number" "BM04B-SRSS-TB"
 			(at 135.89 133.35 0)
 			(effects
 				(font

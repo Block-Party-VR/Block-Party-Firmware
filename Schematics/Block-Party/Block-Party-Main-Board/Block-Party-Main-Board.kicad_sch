@@ -4012,7 +4012,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "UJC-HP-3-SMT-TR"
+		(property "Value" "USBC-0015IPX6-00"
 			(at 214.63 130.81 0)
 			(effects
 				(font

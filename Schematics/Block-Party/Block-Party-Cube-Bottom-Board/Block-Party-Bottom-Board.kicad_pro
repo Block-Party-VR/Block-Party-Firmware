@@ -470,7 +470,7 @@
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "PCB Models/Block-Party-Bottom-PCB.step",
+      "step": "../../../../../../Downloads/Block-Party-Bottom-PCB.step",
       "svg": "",
       "vrml": ""
     },

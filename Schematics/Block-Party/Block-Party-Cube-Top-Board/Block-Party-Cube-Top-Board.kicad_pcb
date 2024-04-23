@@ -150,6 +150,8 @@
 			)
 		)
 		(path "/4a74192a-749f-46a8-847b-04f543810b79")
+		(sheetname "Root")
+		(sheetfile "Block-Party-Cube-Top-Board.kicad_sch")
 		(attr through_hole)
 		(fp_rect
 			(start -9.044238 -9.06015)
@@ -279,7 +281,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "4328"
+		(property "Value" "BM04B-SRSS-TB(LF)(SN) "
 			(at 4.605 -4.435 180)
 			(layer "B.Fab")
 			(uuid "b5c8a879-c1a9-4bcf-a078-ea6cb427eeb1")
@@ -317,7 +319,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "BM04B-SRSS-TB(LF)(SN) "
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "B.Fab")
@@ -498,7 +500,7 @@
 				(justify mirror)
 			)
 		)
-		(property "MANUFACTURER" "Adafruit"
+		(property "MANUFACTURER" "JST"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "B.Fab")
@@ -513,6 +515,8 @@
 			)
 		)
 		(path "/75bc0b05-5f83-4712-b088-2ce83184fba2")
+		(sheetname "Root")
+		(sheetfile "Block-Party-Cube-Top-Board.kicad_sch")
 		(attr smd)
 		(fp_line
 			(start 3 -0.47)
