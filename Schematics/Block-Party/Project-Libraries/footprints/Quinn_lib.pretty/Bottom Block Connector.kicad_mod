@@ -180,6 +180,14 @@
 		(thermal_bridge_angle 45)
 		(uuid "67f10c74-799d-45f0-9caf-f7788f5f662e")
 	)
+	(pad "1" smd rect
+		(at -7 -7)
+		(size 4 4)
+		(layers "B.Cu" "F.Paste" "F.Mask")
+		(clearance 0.001)
+		(thermal_bridge_angle 45)
+		(uuid "0698daae-d3f9-4416-b673-1b0ed072bc05")
+	)
 	(pad "2" smd rect
 		(at 7 -7)
 		(size 4 4)
@@ -187,6 +195,14 @@
 		(clearance 0.001)
 		(thermal_bridge_angle 45)
 		(uuid "a5b1f81b-cb2b-416c-b453-ea4304670bb1")
+	)
+	(pad "2" smd rect
+		(at 7 -7)
+		(size 4 4)
+		(layers "B.Cu" "F.Paste" "F.Mask")
+		(clearance 0.001)
+		(thermal_bridge_angle 45)
+		(uuid "dfa9815c-8572-45e1-aa57-635d938fa16d")
 	)
 	(pad "3" smd rect
 		(at -7 7)
@@ -196,6 +212,14 @@
 		(thermal_bridge_angle 45)
 		(uuid "da72c725-260f-4450-853e-3474c2ff991f")
 	)
+	(pad "3" smd rect
+		(at -7 7)
+		(size 4 4)
+		(layers "B.Cu" "F.Paste" "F.Mask")
+		(clearance 0.001)
+		(thermal_bridge_angle 45)
+		(uuid "b445c4b9-47ab-4f73-83d4-c57f52276101")
+	)
 	(pad "4" smd rect
 		(at 7 7)
 		(size 4 4)
@@ -203,6 +227,14 @@
 		(clearance 0.001)
 		(thermal_bridge_angle 45)
 		(uuid "53b0381f-8039-47a9-b28f-377cffe7060a")
+	)
+	(pad "4" smd rect
+		(at 7 7)
+		(size 4 4)
+		(layers "B.Cu" "F.Paste" "F.Mask")
+		(clearance 0.001)
+		(thermal_bridge_angle 45)
+		(uuid "dd549abf-fa6f-479b-a9f8-a78bbb146145")
 	)
 	(pad "5" thru_hole oval
 		(at -9.65 -7)

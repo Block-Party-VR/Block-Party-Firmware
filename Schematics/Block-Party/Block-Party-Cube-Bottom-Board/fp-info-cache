@@ -1,4 +1,4 @@
-23049732775160665
+23051446608859384
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -83815,8 +83815,8 @@ AFC20-S04BCC-00
 
 
 0
-0
-0
+6
+5
 Quinn_lib
 Bottom Block Connector
 
@@ -83845,6 +83845,13 @@ XL-1615RGBC-WS2812B
 0
 4
 4
+Quinn_lib
+YTC-A1001LF-04A
+
+
+0
+0
+0
 RF
 Skyworks_SKY13575_639LF
 http://www.skyworksinc.com/uploads/documents/SKY13575_639LF_203270D.pdf
