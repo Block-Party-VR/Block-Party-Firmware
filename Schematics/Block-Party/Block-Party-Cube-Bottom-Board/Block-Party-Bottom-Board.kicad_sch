@@ -3348,7 +3348,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer_Part_Number" "XL-1615RGBC-RF"
+		(property "Manufacturer_Part_Number" "XINGLIGHT XL-1615RGBC-WS2812B"
 			(at 172.72 85.09 0)
 			(effects
 				(font
@@ -3573,7 +3573,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer_Part_Number" "XL-1615RGBC-RF"
+		(property "Manufacturer_Part_Number" "XINGLIGHT XL-1615RGBC-WS2812B"
 			(at 144.78 85.09 0)
 			(effects
 				(font
