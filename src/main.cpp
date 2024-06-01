@@ -3,7 +3,8 @@
 #include <BluetoothSerial.h>
 
 // project specific libraries
-#include "BluetoothSerialMessage.h"
+#include "BluetoothSerial.h"
+#include "SerialMessage.h"
 #include "BoardLayout.h"
 #include "BOARD-DEFINITIONS.h"
 #include "Color.h"
@@ -22,8 +23,8 @@ enum Commands : uint8_t{
 // --------------------------------------------------
 // ------------- OBJECT DEFINITIONS -----------------
 // --------------------------------------------------
-BluetoothSerial SerialBT;
-BluetoothSerialMessage serialMessageBT(&SerialBT);
+// BluetoothSerial SerialBT;
+// BluetoothSerialMessage serialMessageBT(&SerialBT);
 SerialMessage serialMessage(&Serial);
 BoardLayout board(BOARD_WIDTH, BOARD_LENGTH, BOARD_HEIGHT, stacks);
 
@@ -44,20 +45,20 @@ void printBoardState(){
   board.GetBoardState(boardState);
 
   Serial.print("!0,");
-  SerialBT.print("!0,");
+  // SerialBT.print("!0,");
 
   for(int i = 0; i < (BOARD_WIDTH * BOARD_LENGTH); i++){
     Serial.print(boardState[i]);
-    SerialBT.print(boardState[i]);
+    // SerialBT.print(boardState[i]);
     if(i == (BOARD_WIDTH * BOARD_LENGTH) - 1){
       break;
     }
     Serial.print(",");
-    SerialBT.print(",");
+    // SerialBT.print(",");
   }
 
   Serial.println(";");
-  SerialBT.println(";");
+  // SerialBT.println(";");
 }
 
 void setStackColor(int * args, int argsLength){
@@ -85,26 +86,26 @@ void parseData(int * args, int argsLength){
       break;
     case Commands::PING:
       Serial.print("!");
-      SerialBT.print("!");
+      // SerialBT.print("!");
       Serial.print(Commands::PING);
-      SerialBT.print(Commands::PING);
+      // SerialBT.print(Commands::PING);
       Serial.println(";");
-      SerialBT.println(";");
+      // SerialBT.println(";");
       break;
     case Commands::SetStackColors:
       Serial.println("!2;");
-      SerialBT.println("!2;");
+      // SerialBT.println("!2;");
       colorManager.Enable(false);
       setStackColor(args, argsLength);
       break;
     case Commands::GoToIdle:
       Serial.println("!3;");
-      SerialBT.println("!3;");
+      // SerialBT.println("!3;");
       colorManager.Enable(true);
       break;
     default:
       Serial.println("INVALID COMMAND");
-      SerialBT.println("INVALID COMMAND");
+      // SerialBT.println("INVALID COMMAND");
       break;
   }
 }
@@ -113,8 +114,8 @@ void parseData(int * args, int argsLength){
 // ----------------- SETUP AND LOOP -----------------
 // --------------------------------------------------
 void setup() {
-  Serial.begin(115200);
-  SerialBT.begin("blockPartyBT");
+  Serial.begin(9600);
+  // SerialBT.begin("blockPartyBT");
   Color colors[] = {Color(255, 0, 0), Color(0, 0, 0), Color(0, 0, 0)};
   board.SetStackColors(2, colors);
   
@@ -132,10 +133,10 @@ void loop() {
     parseData(serialMessage.GetArgs(), serialMessage.GetArgsLength());
     serialMessage.ClearNewData();
   }
-  serialMessageBT.Update();
-  if(serialMessageBT.IsNewData()){
-    parseData(serialMessageBT.GetArgs(), serialMessageBT.GetArgsLength());
-    serialMessageBT.ClearNewData();
-  }
+  // serialMessageBT.Update();
+  // if(serialMessageBT.IsNewData()){
+  //   parseData(serialMessageBT.GetArgs(), serialMessageBT.GetArgsLength());
+  //   serialMessageBT.ClearNewData();
+  // }
   colorManager.Update();
 }
