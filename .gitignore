@@ -1,6 +1,6 @@
 .pio
 .vscode
-*.kicad_pcb.lck
+*.lck
 
 Schematics/Block-Party/Block-Party-Main-Board/production/
 Schematics/Block-Party/Block-Party-Cube-Top-Board/production

@@ -3573,7 +3573,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer_Part_Number" "Quinn_lib:XL-1615RGBC-WS2812B"
+		(property "Manufacturer_Part_Number" "XINGLIGHT XL-1615RGBC-WS2812B"
 			(at 144.78 85.09 0)
 			(effects
 				(font
