@@ -113,18 +113,30 @@ void parseData(int * args, int argsLength){
 // --------------------------------------------------
 // ----------------- SETUP AND LOOP -----------------
 // --------------------------------------------------
+uint32_t boardStateTimer{0};
+bool boardStateHasChanged{false};
+uint32_t boardStateMaxUpdatePeriod{15}; // this is a little faster than 60fps
+
 void setup() {
   Serial.begin(9600);
   // SerialBT.begin("blockPartyBT");
   Color colors[] = {Color(255, 0, 0), Color(0, 0, 0), Color(0, 0, 0)};
   board.SetStackColors(2, colors);
+
+  boardStateTimer = millis();
   
 }
 
+
 void loop() {
   if(board.BoardStateHasChanged()){
+    boardStateHasChanged = true;
+  }
+
+  if(millis() - boardStateTimer > boardStateMaxUpdatePeriod && boardStateHasChanged){
+    boardStateTimer = millis();
     printBoardState();
-    
+    boardStateHasChanged = false;
   }
 
   // DO serial processing
