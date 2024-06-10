@@ -25,7 +25,7 @@ enum Commands : uint8_t{
 // --------------------------------------------------
 // BluetoothSerial SerialBT;
 // BluetoothSerialMessage serialMessageBT(&SerialBT);
-SerialMessage serialMessage(&Serial);
+SerialMessage<500> serialMessage(&Serial);
 BoardLayout board(BOARD_WIDTH, BOARD_LENGTH, BOARD_HEIGHT, stacks);
 
 // Temporary thing until we can get bluetooth color management working on the quest
@@ -61,9 +61,9 @@ void printBoardState(){
   // SerialBT.println(";");
 }
 
-void setStackColor(int * args, int argsLength){
-  int stackNum = args[1];
-  int numColors = (argsLength - 2) / 3;
+void setStackColor(uint32_t * args, int argsLength){
+  uint32_t stackNum = args[1];
+  uint32_t numColors = (argsLength - 2) / 3;
   Color colors[numColors];
   
   for(int i = 0; i < numColors; i++){
@@ -78,8 +78,8 @@ void setStackColor(int * args, int argsLength){
 
 }
 
-void parseData(int * args, int argsLength){
-  int command = args[0];
+void parseData(uint32_t * args, int argsLength){
+  uint32_t command = args[0];
   switch(command){
     case Commands::BoardState:
       printBoardState();

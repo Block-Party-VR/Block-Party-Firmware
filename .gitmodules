@@ -1,0 +1,3 @@
+[submodule "lib/SerialMessage"]
+	path = lib/SerialMessage
+	url = https://github.com/Cynopolis/SerialMessage.git
