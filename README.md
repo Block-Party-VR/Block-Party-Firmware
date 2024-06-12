@@ -52,6 +52,9 @@ wiring diagram for the cube is in the `documentation` directory.
 - Adafruit’s Neopixel library
 - Arduino libraries
 
+### Bluetooth Module
+On v0.1 of the baord, a seperate bluetooth module (HC-05) is being used for bluetooth. This module needs to be programmed when first plugged in. To program the module, disconnect it from power and hold the "EN" button on the module. (The button should be the only button on the HC-05 module). While still holding down the button, reconnect the module to the ESP32 and press the ESP32's reset button. Wait 5 seconds while still holding down the "EN" button on the module, then release the button, power cycle the module, and you're done.
+
 ## Run
 - Power up the board and pair it with the headset over bluetooth.
 - Build and load the Unity project to the headset.
@@ -112,7 +115,7 @@ Description Set the colors for one of the stacks.
 - Red1, Green1, Blue1 correspond with the color of the first cube in the stack and so on. These values can be between 0-255.
 You can add as many colors as you want, but they wont display if the corresponding cube doesn't physically exist.
 
-### COmmand Name: `GoToIdle`
+### Command Name: `GoToIdle`
 Command Number: `3`
 
 Format Example `!3;`

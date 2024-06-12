@@ -21,7 +21,7 @@ enum Commands : uint8_t{
 };
 
 // --------------------------------------------------
-// ------------- OBJECT DEFINITIONS -----------------
+// ----------------- VARIABLES ----------------------
 // --------------------------------------------------
 // BluetoothSerial SerialBT;
 // BluetoothSerialMessage serialMessageBT(&SerialBT);
@@ -32,12 +32,46 @@ BoardLayout board(BOARD_WIDTH, BOARD_LENGTH, BOARD_HEIGHT, stacks);
 ColorManager colorManager(&board);
 
 // --------------------------------------------------
-// ----------------- VARIABLES ----------------------
-// --------------------------------------------------
-
-// --------------------------------------------------
 // ----------------- FUNCTIONS ----------------------
 // --------------------------------------------------
+void SetupBluetoothModule(){
+  pinMode(BT_STATE_PIN, INPUT);
+  // pull the enable pin high on boot to enable AT command mode
+  pinMode(BT_EN_PIN, OUTPUT);
+  digitalWrite(BT_EN_PIN, HIGH);
+  // Set the serial baud rate to 38400 which is the default for this module
+  Serial.begin(38400);
+  // Reset the module to default settings
+  Serial.print("AT+ORGL\r\n");
+  delay(100);
+  // Set the serial baud rate to 38400 which is the default for this module
+  Serial.begin(9600);
+  // Reset the module to default settings
+  Serial.print("AT+ORGL\r\n");
+  delay(100);
+  // set the baud rate of the bluetooth module to 9600
+  Serial.print("AT+UART=9600,0,0\r\n");
+  // Serial.begin(9600);
+  delay(100);
+  // Set the bluetooth's name to blockPartyBT
+  Serial.print("AT+NAME=blockPartyBT\r\n");
+  delay(100);
+  // // set the bluetooth's role to slave
+  // Serial.print("AT+ROLE=0\r\n");
+  // delay(100);
+  // // set the connection mode to slave mode
+  // Serial.print("AT+CMODE=0\r\n");
+  // delay(100);
+  // // remove the password
+  // Serial.print("AT+PSWD=\r\n");
+  // delay(100);
+  // // allow the module to be set to any address
+  // Serial.print("AT+ADDR=0\r\n");
+  // delay(100);
+
+  digitalWrite(BT_EN_PIN, LOW);
+
+}
 void printBoardState(){
   // create a buffer to hold the board state
   uint16_t boardState[BOARD_WIDTH * BOARD_LENGTH];
@@ -118,6 +152,8 @@ bool boardStateHasChanged{false};
 uint32_t boardStateMaxUpdatePeriod{15}; // this is a little faster than 60fps
 
 void setup() {
+  delay(1000);
+  SetupBluetoothModule();
   Serial.begin(9600);
   // SerialBT.begin("blockPartyBT");
   Color colors[] = {Color(255, 0, 0), Color(0, 0, 0), Color(0, 0, 0)};

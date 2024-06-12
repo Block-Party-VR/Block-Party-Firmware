@@ -5,6 +5,7 @@
 
 #pragma once
 
+// Stack pins
 // Stack 1 pins
 #define STACK1_ADC_PIN 6
 #define STACK1_LED_PIN 11
@@ -37,7 +38,12 @@
 #define STACK8_ADC_PIN 7
 #define STACK8_LED_PIN 12
 
+
 // Stack 9 pins
 #define STACK9_ADC_PIN 17
 #define STACK9_LED_PIN 37
+
+// Bluetooth module configuration pins
+#define BT_STATE_PIN 2
+#define BT_EN_PIN 3
 
