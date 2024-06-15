@@ -23,6 +23,10 @@ enum Commands : uint8_t{
 // --------------------------------------------------
 // ----------------- VARIABLES ----------------------
 // --------------------------------------------------
+uint32_t boardStateTimer{0};
+bool boardStateHasChanged{false};
+uint32_t boardStateMaxUpdatePeriod{34}; // this is a little slower than 30fps
+
 // BluetoothSerial SerialBT;
 // BluetoothSerialMessage serialMessageBT(&SerialBT);
 SerialMessage<500> serialMessage(&Serial);
@@ -35,42 +39,25 @@ ColorManager colorManager(&board);
 // ----------------- FUNCTIONS ----------------------
 // --------------------------------------------------
 void SetupBluetoothModule(){
-  pinMode(BT_STATE_PIN, INPUT);
-  // pull the enable pin high on boot to enable AT command mode
-  pinMode(BT_EN_PIN, OUTPUT);
-  digitalWrite(BT_EN_PIN, HIGH);
-  // Set the serial baud rate to 38400 which is the default for this module
   Serial.begin(38400);
-  // Reset the module to default settings
-  Serial.print("AT+ORGL\r\n");
+  Serial.print("AT+UART=9600,0,0\r\n"); // set baud rate to 9600
   delay(100);
-  // Set the serial baud rate to 38400 which is the default for this module
+
+  Serial.print("AT+NAME=blockPartyBT\r\n"); // set name to blockPartyBT
+  delay(100);
+
+  Serial.print("AT+PSWD=1234\r\n"); // set password to 1234
+  delay(100);
+
+  Serial.print("AT+ROLE=0\r\n"); // set to slave
+  delay(100);
+
+  
+
+  // exit at mode and go into pairing mode
+  Serial.print("AT+INIT\r\n");
   Serial.begin(9600);
-  // Reset the module to default settings
-  Serial.print("AT+ORGL\r\n");
   delay(100);
-  // set the baud rate of the bluetooth module to 9600
-  Serial.print("AT+UART=9600,0,0\r\n");
-  // Serial.begin(9600);
-  delay(100);
-  // Set the bluetooth's name to blockPartyBT
-  Serial.print("AT+NAME=blockPartyBT\r\n");
-  delay(100);
-  // // set the bluetooth's role to slave
-  // Serial.print("AT+ROLE=0\r\n");
-  // delay(100);
-  // // set the connection mode to slave mode
-  // Serial.print("AT+CMODE=0\r\n");
-  // delay(100);
-  // // remove the password
-  // Serial.print("AT+PSWD=\r\n");
-  // delay(100);
-  // // allow the module to be set to any address
-  // Serial.print("AT+ADDR=0\r\n");
-  // delay(100);
-
-  digitalWrite(BT_EN_PIN, LOW);
-
 }
 void printBoardState(){
   // create a buffer to hold the board state
@@ -147,9 +134,6 @@ void parseData(uint32_t * args, int argsLength){
 // --------------------------------------------------
 // ----------------- SETUP AND LOOP -----------------
 // --------------------------------------------------
-uint32_t boardStateTimer{0};
-bool boardStateHasChanged{false};
-uint32_t boardStateMaxUpdatePeriod{15}; // this is a little faster than 60fps
 
 void setup() {
   delay(1000);
