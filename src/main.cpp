@@ -43,7 +43,7 @@ void SetupBluetoothModule(){
   Serial.print("AT+UART=9600,0,0\r\n"); // set baud rate to 9600
   delay(100);
 
-  Serial.print("AT+NAME=blockPartyBT\r\n"); // set name to blockPartyBT
+  Serial.print("AT+NAME=blockPartyBT-v01\r\n"); // set name to blockPartyBT-v0.1
   delay(100);
 
   Serial.print("AT+PSWD=1234\r\n"); // set password to 1234
