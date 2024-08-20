@@ -15,20 +15,22 @@ CubeStack::CubeStack(uint16_t ADCPin, uint16_t ledPin, uint8_t numLEDs){
 uint8_t CubeStack::GetNumberCubes(){
     // read the ADC and return the number of cubes
     /*
-    0 cubes: 1 : 4095-3071
-    1 cube: 1/2 3070-1706
-    2 cubes: 1/3 1705-1195
-    3 cubes: 1/4 1195-0
+    0 cubes: 1 : 4095-3400
+    1 cube: 1/2 3400-2500
+    2 cubes: 1/3 2500-1850
+    3 cubes: 1/4 1850-0
     */
     uint16_t value = analogRead(this->ADCPin);
-
     this->lowPassADCRead = static_cast<uint16_t>((static_cast<float>(this->lowPassADCRead) * 0.9) + (static_cast<float>(value) * 0.1));
+    if(this->lowPassADCRead < 2500 && false){
+        Serial.println("ADC Pin:" + String(this->ADCPin) + " Value: " + String(value) + " Low Pass: " + String(this->lowPassADCRead));
+    }
 
     // temporary definitions to define value ranges:
     uint16_t zeroCubesHigh = 4095;
-    uint16_t zeroCubesLow = 3071;
-    uint16_t oneCubeLow = 1706;
-    uint16_t twoCubesLow = 1000;
+    uint16_t zeroCubesLow = 3400;
+    uint16_t oneCubeLow = 2500;
+    uint16_t twoCubesLow = 1850;
     uint16_t threeCubesLow = 0;
 
     uint8_t stackHeight = 0;

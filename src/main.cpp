@@ -21,23 +21,44 @@ enum Commands : uint8_t{
 };
 
 // --------------------------------------------------
-// ------------- OBJECT DEFINITIONS -----------------
+// ----------------- VARIABLES ----------------------
 // --------------------------------------------------
+uint32_t boardStateTimer{0};
+bool boardStateHasChanged{false};
+uint32_t boardStateMaxUpdatePeriod{34}; // this is a little slower than 30fps
+
 // BluetoothSerial SerialBT;
 // BluetoothSerialMessage serialMessageBT(&SerialBT);
-SerialMessage serialMessage(&Serial);
+SerialMessage<500> serialMessage(&Serial);
 BoardLayout board(BOARD_WIDTH, BOARD_LENGTH, BOARD_HEIGHT, stacks);
 
 // Temporary thing until we can get bluetooth color management working on the quest
 ColorManager colorManager(&board);
 
 // --------------------------------------------------
-// ----------------- VARIABLES ----------------------
-// --------------------------------------------------
-
-// --------------------------------------------------
 // ----------------- FUNCTIONS ----------------------
 // --------------------------------------------------
+void SetupBluetoothModule(){
+  Serial.begin(38400);
+  Serial.print("AT+UART=9600,0,0\r\n"); // set baud rate to 9600
+  delay(100);
+
+  Serial.print("AT+NAME=blockPartyBT-v01\r\n"); // set name to blockPartyBT-v0.1
+  delay(100);
+
+  Serial.print("AT+PSWD=1234\r\n"); // set password to 1234
+  delay(100);
+
+  Serial.print("AT+ROLE=0\r\n"); // set to slave
+  delay(100);
+
+  
+
+  // exit at mode and go into pairing mode
+  Serial.print("AT+INIT\r\n");
+  Serial.begin(9600);
+  delay(100);
+}
 void printBoardState(){
   // create a buffer to hold the board state
   uint16_t boardState[BOARD_WIDTH * BOARD_LENGTH];
@@ -61,9 +82,9 @@ void printBoardState(){
   // SerialBT.println(";");
 }
 
-void setStackColor(int * args, int argsLength){
-  int stackNum = args[1];
-  int numColors = (argsLength - 2) / 3;
+void setStackColor(uint32_t * args, int argsLength){
+  uint32_t stackNum = args[1];
+  uint32_t numColors = (argsLength - 2) / 3;
   Color colors[numColors];
   
   for(int i = 0; i < numColors; i++){
@@ -78,8 +99,8 @@ void setStackColor(int * args, int argsLength){
 
 }
 
-void parseData(int * args, int argsLength){
-  int command = args[0];
+void parseData(uint32_t * args, int argsLength){
+  uint32_t command = args[0];
   switch(command){
     case Commands::BoardState:
       printBoardState();
@@ -113,18 +134,29 @@ void parseData(int * args, int argsLength){
 // --------------------------------------------------
 // ----------------- SETUP AND LOOP -----------------
 // --------------------------------------------------
+
 void setup() {
+  delay(1000);
+  SetupBluetoothModule();
   Serial.begin(9600);
   // SerialBT.begin("blockPartyBT");
   Color colors[] = {Color(255, 0, 0), Color(0, 0, 0), Color(0, 0, 0)};
   board.SetStackColors(2, colors);
+
+  boardStateTimer = millis();
   
 }
 
+
 void loop() {
   if(board.BoardStateHasChanged()){
+    boardStateHasChanged = true;
+  }
+
+  if(millis() - boardStateTimer > boardStateMaxUpdatePeriod && boardStateHasChanged){
+    boardStateTimer = millis();
     printBoardState();
-    
+    boardStateHasChanged = false;
   }
 
   // DO serial processing
