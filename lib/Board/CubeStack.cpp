@@ -12,7 +12,7 @@ CubeStack::CubeStack(uint16_t ADCPin, uint16_t ledPin, uint8_t numLEDs){
     }
 };
 
-uint8_t CubeStack::GetNumberCubes(){
+uint32_t CubeStack::GetNumberCubes(Cube &cube){
     // read the ADC and return the number of cubes
     /*
     0 cubes: 1 : 4095-3400
@@ -20,11 +20,8 @@ uint8_t CubeStack::GetNumberCubes(){
     2 cubes: 1/3 2500-1850
     3 cubes: 1/4 1850-0
     */
-    uint16_t value = analogRead(this->ADCPin);
-    this->lowPassADCRead = static_cast<uint16_t>((static_cast<float>(this->lowPassADCRead) * 0.9) + (static_cast<float>(value) * 0.1));
-    if(this->lowPassADCRead < 2500 && false){
-        Serial.println("ADC Pin:" + String(this->ADCPin) + " Value: " + String(value) + " Low Pass: " + String(this->lowPassADCRead));
-    }
+    uint16_t value = analogRead(cube.ADCPin);
+    uint16_t lowPassADCRead = static_cast<uint16_t>((static_cast<float>(cube.lastADCReading) * 0.9) + (static_cast<float>(value) * 0.1));
 
     // temporary definitions to define value ranges:
     uint16_t zeroCubesHigh = 4095;
@@ -35,35 +32,20 @@ uint8_t CubeStack::GetNumberCubes(){
 
     uint8_t stackHeight = 0;
 
-    if(this->lowPassADCRead >= zeroCubesLow && this->lowPassADCRead <= zeroCubesHigh){
+    if(lowPassADCRead >= zeroCubesLow && lowPassADCRead <= zeroCubesHigh){
         stackHeight = 0;
     }
-    else if(this->lowPassADCRead >= oneCubeLow){
+    else if(lowPassADCRead >= oneCubeLow){
         stackHeight = 1;
     }
-    else if(this->lowPassADCRead >= twoCubesLow){
+    else if(lowPassADCRead >= twoCubesLow){
         stackHeight = 2;
     }
-    else if(this->lowPassADCRead >= threeCubesLow){
+    else if(lowPassADCRead >= threeCubesLow){
         stackHeight = 3;
-    }
-    if(this->lastStackHeight != stackHeight){
-        this->lastStackHeight = stackHeight;
-        this->SendLEDData();
     }
     
     return stackHeight;
-}
-
-void CubeStack::SetLEDColors(Color * colors, uint8_t numColors){
-    // copy the colors into the ledColors array
-    for(int i = 0; i < numColors; i++){
-        this->ledColors[i].red = colors[i].red;
-        this->ledColors[i].green = colors[i].green;
-        this->ledColors[i].blue = colors[i].blue;
-    }
-
-    this->SendLEDData();
 }
 
 void CubeStack::SendLEDData(){
