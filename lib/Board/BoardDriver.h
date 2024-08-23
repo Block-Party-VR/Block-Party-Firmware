@@ -1,3 +1,8 @@
+/**
+ * @file BoardDriver.h
+ * @brief the board driver provides helpful methods to read the physical board's state, 
+ * filter those results, and send color data to the board
+ */
 #pragma once
 
 #include <cstdint>
@@ -13,15 +18,48 @@ template <uint32_t NUM_STACKS>
 class BoardDriver{
 public:
 
+    /**
+     * @param stacks a reference to an array which contains information about the pins which control each cube stack.
+     * @param pixelController a reference to a pre-constructed neopixel controller which will allow this driver to control neopixels
+     */
     BoardDriver(std::array<BOARD_TYPES::CubeStack, NUM_STACKS> &stacks, Adafruit_NeoPixel &pixelController);
     ~BoardDriver() = default;
 
+    /**
+     * @brief Initializes all of the pins necessary to read/write to the board
+     */
     void Init();
 
+    /**
+     * @param numXStacks the width of the board along the x dimension.
+     * @param X_COORD the x coordinate of the stack you want information about
+     * @param Y_COORD the y coordinate of the stack you want information about
+     * @returns Get the number of cubes present in a stack
+     */
     uint32_t GetNumberCubes(uint32_t numXStacks, uint32_t X_COORD, uint32_t Y_COORD);
+
+    /**
+     * @param stackIndex the index of the stack that you want to know the height of
+     * @returns Get the number of cubes present in a stack
+     */
     uint32_t GetNumberCubes(uint32_t stackIndex);
 
+    /**
+     * @brief stream data to a single cube stack on the board
+     * @param numXStacks the width of the board along the x dimension.
+     * @param X_COORD the x coordinate of the stack you want information about
+     * @param Y_COORD the y coordinate of the stack you want information about
+     * @param cubes an array of cube pointers which contain the color data you want to stream
+     * @param numCubes the number of cubes in the cubes array
+     */
     void UpdateStackLEDs(uint32_t numXStacks, uint32_t X_COORD, uint32_t Y_COORD, Cube* cubes[], uint32_t numCubes);
+
+    /**
+     * @brief stream data to a single cube stack on the board
+     * @param stackIndex the index of the stack you want to update the color of
+     * @param cubes an array of cube pointers which contain the color data you want to stream
+     * @param numCubes the number of cubes in the cubes array
+     */
     void UpdateStackLEDs(uint32_t stackIndex, Cube* cubes[], uint32_t numCubes);
 
 

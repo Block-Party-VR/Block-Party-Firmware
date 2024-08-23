@@ -1,3 +1,8 @@
+/**
+ * @file Board.h
+ * @brief The Board class is meant to store data about each cube on the board and 
+ * provide an easy way to organize and access that data in a 3-dimensional context.
+ */
 #pragma once
 
 #include <cstdint>
