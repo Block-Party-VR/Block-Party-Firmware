@@ -10,8 +10,7 @@
 template <const V3D &BOARD_DIMS>
 class Board{
     public:
-
-    Board();
+    Board() = default;
     ~Board() = default;
 
     constexpr const V3D &GetSize() const{return BOARD_DIMS;}
@@ -26,17 +25,43 @@ class Board{
     void ToStackString(String& stringBuffer) const;
 
     /**
-     * @brief Returns a bool array representing the board
+     * @returns Returns an array which contains how many cubes are in each z column on the board
      */
     std::array<uint32_t, BOARD_DIMS.x * BOARD_DIMS.y> &LinearizeBoard() const;
 
+    /**
+     * @brief fill the entire board with the given color
+     * @param color the color to fill the board with
+     */
     void FillColor(const V3D &color);
 
+    /**
+     * @brief Set the color of the cube at the given position. 
+     * Even if the cube is not occupied, it will remember this color
+     *  and turn that color if it becomes occupied.
+     * @param position the position of the cube.
+     * @param color the color you want the cube to be
+     */
     void SetCubeColor(const V3D &position, const V3D &color);
 
+    /**
+     * @brief Set the occupation status of the cube at a given position
+     * @param position the position of the cube
+     * @param the occupation status of the cube
+     * @post if the new occupation status of the cube is different than 
+     * the old occupation status, this will enable boardStateHasChanged.
+     */
     void SetCubeOccupation(const V3D &position, bool occupation);
 
+    /**
+     * @returns true if the board state has changed since this flag was last set to false
+     */
     bool BoardStateChanged(){return this->boardStateHasChanged;}
+
+    /**
+     * @brief set the board state status.
+     * @note you should probably only use this to clear the baordState flag
+     */
     void SetStateChanged(bool boardState){this->boardStateHasChanged = boardState;}
 
     /**
@@ -64,11 +89,6 @@ class Board{
 
     bool boardStateHasChanged;
 };
-
-template <const V3D &BOARD_DIMS>
-Board<BOARD_DIMS>::Board(){
-    this->FillColor(V3D{});
-}
 
 template <const V3D &BOARD_DIMS>
 void Board<BOARD_DIMS>::ToStackString(String &stringBuffer) const{
