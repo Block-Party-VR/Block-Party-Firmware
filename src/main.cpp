@@ -2,6 +2,8 @@
 #include <Arduino.h>
 #include <BluetoothSerial.h>
 #include <FreeRTOS.h>
+#include <Adafruit_NeoPixel.h>
+#include <chrono>
 
 // Static Defines
 #include "PINOUT.h"
@@ -11,8 +13,11 @@
 // project specific libraries
 #include "BluetoothSerial.h"
 #include "SerialMessage.h"
-#include "Color.h"
 #include "GlobalPrint.h"
+
+#include "BoardManager.h"
+#include "BoardDriver.h"
+#include "BoardTypes.h"
 
 // --------------------------------------------------
 // ----------------- VARIABLES ----------------------
@@ -20,14 +25,14 @@
 TaskHandle_t updateCommunicaitonTask;
 TaskHandle_t updateBoardTask;
 
-uint32_t boardStateTimer{0};
-bool boardStateHasChanged{false};
-uint32_t boardStateMaxUpdatePeriod{34}; // this is a little slower than 30fps
-
 // BluetoothSerial SerialBT;
 // BluetoothSerialMessage serialMessageBT(&SerialBT);
 SerialMessage<500, 10> serialMessage(&Serial);
 
+Adafruit_NeoPixel pixelController{BOARD_HEIGHT*2, STACK1_LED_PIN, NEO_GRB + NEO_KHZ800};
+
+BoardDriver<BOARD_WIDTH*BOARD_LENGTH> boardDriver{stacks, pixelController};
+BoardManager<BOARD_DIMENSIONS> boardManager{boardDriver};
 // --------------------------------------------------
 // ----------------- FUNCTIONS ----------------------
 // --------------------------------------------------
@@ -58,37 +63,30 @@ void SetupBluetoothModule(){
 
 
 void printBoardState(){
-  // create a buffer to hold the board state
-  uint16_t boardState[BOARD_WIDTH * BOARD_LENGTH];
-  // read in the board state
-  board.GetBoardState(boardState);
-
   GlobalPrint::Print("!0,");
-
-  for(int i = 0; i < (BOARD_WIDTH * BOARD_LENGTH); i++){
-    GlobalPrint::Print(String(boardState[i]));
-    if(i == (BOARD_WIDTH * BOARD_LENGTH) - 1){
-      break;
-    }
-    GlobalPrint::Print(",");
-  }
-
+  GlobalPrint::Print(boardManager.Board2StackString());
   GlobalPrint::Println(";");
 }
 
 void SetStackColor(uint32_t * args, int argsLength){
   uint32_t stackNum = args[1];
+  uint32_t X_COORD{stackNum};
+  while(X_COORD > BOARD_DIMENSIONS.x - 1){
+    X_COORD -= BOARD_DIMENSIONS.x;
+  }
+  uint32_t Y_COORD{(stackNum - X_COORD) / BOARD_DIMENSIONS.y};
+
   uint32_t numColors = (argsLength - 2) / 3;
-  Color colors[numColors];
+  V3D colors[numColors];
   
   for(int i = 0; i < numColors; i++){
     int red = args[2 + (i * 3)];
     int green = args[3 + (i * 3)];
     int blue = args[4 + (i * 3)];
-    colors[i] = Color(red, green, blue);
+    colors[i] = V3D{red, green, blue};
   }
 
-  board.SetStackColors(stackNum, colors);
+  boardManager.SetColumnColors(V3D{X_COORD, Y_COORD, BOARD_TYPES::PLANE_NORMAL::Z}, colors);
 }
 
 void parseData(Message<500, 10> &message){
@@ -104,12 +102,14 @@ void parseData(Message<500, 10> &message){
       break;
     case Commands::SetStackColors:
       GlobalPrint::Println("!2;");
-      colorManager.Enable(false);
+      // TODO: replace this with the animator
+      // colorManager.Enable(false);
       SetStackColor(reinterpret_cast<uint32_t *>(args), argsLength);
       break;
     case Commands::GoToIdle:
       GlobalPrint::Println("!3;");
-      colorManager.Enable(true);
+      // TODO: replace this with the animator
+      // colorManager.Enable(true);
       break;
     default:
       GlobalPrint::Println("INVALID COMMAND");
@@ -144,20 +144,20 @@ void UpdateCommunication(void * params){
 
 void UpdateBoard(void * params){
   Serial.println("Spawning UpdateBoard task");
+  auto updateTickRate{std::chrono::milliseconds(8)};
+  auto boardStateTimer{std::chrono::milliseconds(0)};
+  auto boardStateMaxUpdatePeriod{std::chrono::milliseconds(34)}; // this is a little slower than 30fps
+
   for(;;){
-    if(board.BoardStateHasChanged()){
-      boardStateHasChanged = true;
-    }
-
-    if(millis() - boardStateTimer > boardStateMaxUpdatePeriod && boardStateHasChanged){
-      boardStateTimer = millis();
+    if(boardStateTimer >= boardStateMaxUpdatePeriod && boardManager.HasBoardChanged()){
       printBoardState();
-      boardStateHasChanged = false;
+      boardManager.ClearBoardChanged();
     }
 
-    colorManager.Update();
+    boardManager.Update();
 
-    vTaskDelay(5);
+    boardStateTimer += updateTickRate;
+    vTaskDelay(updateTickRate.count());
   }
   Serial.println("UpdateBoard task has ended unexpectedly!");
 }
@@ -183,10 +183,8 @@ void setup() {
   xTaskCreate(UpdateCommunication, "UpdateCommunication", 10000, NULL, 0, &updateCommunicaitonTask);
 
   Serial.println("Beginning Board Initializaiton");
+  boardManager.Init();
   xTaskCreate(UpdateBoard, "UpdateBoard", 10000, NULL, 0, &updateBoardTask);
-  Color colors[] = {Color(255, 0, 0), Color(0, 0, 0), Color(0, 0, 0)};
-  board.SetStackColors(2, colors);
-  boardStateTimer = millis();
 
   Serial.println("Setup Complete");
 }

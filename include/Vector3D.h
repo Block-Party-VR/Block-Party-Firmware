@@ -5,7 +5,7 @@
 
 class V3D{
     public:
-    V3D(uint32_t x=0, uint32_t y=0, uint32_t z=0): 
+    constexpr V3D(uint32_t x=0, uint32_t y=0, uint32_t z=0): 
     x(x), 
     y(y), 
     z(z){}
@@ -38,6 +38,14 @@ class V3D{
         vector.x = this->x / scalar;
         vector.y = this->y / scalar;
         vector.z = this->z / scalar;
+        return vector;
+    }
+
+    V3D operator*(const uint32_t scalar){
+        V3D vector{};
+        vector.x = this->x * scalar;
+        vector.y = this->y * scalar;
+        vector.z = this->z * scalar;
         return vector;
     }
 
