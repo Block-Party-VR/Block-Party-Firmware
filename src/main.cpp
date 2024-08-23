@@ -11,9 +11,7 @@
 // project specific libraries
 #include "BluetoothSerial.h"
 #include "SerialMessage.h"
-#include "BoardLayout.h"
 #include "Color.h"
-#include "ColorManager.h"
 #include "GlobalPrint.h"
 
 // --------------------------------------------------
@@ -29,10 +27,6 @@ uint32_t boardStateMaxUpdatePeriod{34}; // this is a little slower than 30fps
 // BluetoothSerial SerialBT;
 // BluetoothSerialMessage serialMessageBT(&SerialBT);
 SerialMessage<500, 10> serialMessage(&Serial);
-BoardLayout board(BOARD_WIDTH, BOARD_LENGTH, BOARD_HEIGHT, stacks);
-
-// Temporary thing until we can get bluetooth color management working on the quest
-ColorManager colorManager(&board);
 
 // --------------------------------------------------
 // ----------------- FUNCTIONS ----------------------

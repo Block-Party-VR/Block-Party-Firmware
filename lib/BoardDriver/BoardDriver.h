@@ -4,15 +4,10 @@
 #include <array>
 
 #include <Adafruit_NeoPixel.h>
+#include <Arduino.h>
 
 #include "Cube.h"
-
-namespace BoardDriverTypes{
-    struct CubeStack{
-        uint8_t adcPin;
-        uint8_t ledPin;
-    }
-};
+#include "BoardDriverTypes.h"
 
 template <uint32_t NUM_STACKS>
 class BoardDriver{
@@ -20,6 +15,8 @@ public:
 
     BoardDriver(std::array<BoardDriverTypes::CubeStack, NUM_STACKS> &stacks, Adafruit_NeoPixel &pixelController);
     ~BoardDriver() = default;
+
+    void Init();
 
     uint32_t GetNumberCubes(uint32_t numXStacks, uint32_t X_COORD, uint32_t Y_COORD);
     uint32_t GetNumberCubes(uint32_t stackIndex);
@@ -39,17 +36,23 @@ private:
 };
 
 template<uint32_t NUM_STACKS>
+void BoardDriver<NUM_STACKS>::Init(){
+    for(uint32_t i = 0; i < NUM_STACKS; i++){
+        pinMode(this->stacks[i].ledPin, OUTPUT);
+    }
+
+    // begin doesn't really do anything besides setting the pinmode
+    this->pixelController.begin();
+}
+
+template<uint32_t NUM_STACKS>
 BoardDriver<NUM_STACKS>::BoardDriver(std::array<BoardDriverTypes::CubeStack, NUM_STACKS> &stacks, Adafruit_NeoPixel &pixelController): 
 stacks(stacks),
 pixelController(pixelController)
 {
     for(uint32_t i = 0; i < NUM_STACKS; i++){
         this->filteredReadings[i] = 0;
-        pinMode(this->stacks[i].ledPin, OUTPUT);
     }
-
-    // begin doesn't really do anything besides setting the pinmode
-    this->pixelController.begin();
 }
 
 template<uint32_t NUM_STACKS>

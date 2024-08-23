@@ -5,17 +5,10 @@
 
 #pragma once
 
-#include "Color.h"
+#include "Vector3D.h"
 
 class Cube{
     public:
-    Cube();
-    Cube();
-
-    void SetColor(const Color &color);
-
-    uint16_t lastADCReading{0};
-
-    Color color;
+    V3D color;
     bool isOccupied{false};
 };
