@@ -9,7 +9,7 @@
 #include <array>
 #include <WString.h>
 
-#include "Cube.h"
+#include "BoardTypes.h"
 #include "Vector3D.h"
 
 template <const V3D &BOARD_DIMS>
@@ -76,7 +76,7 @@ class Board{
      * to fill. IE To fill one stack at 0,2 I would say give V3D(0,2,PLANE_NORMAL::Z)
      * @returns an array of cubes along that column
      */
-    Cube ** SliceBoard(const V3D &column);
+    BOARD_TYPES::Cube ** SliceBoard(const V3D &column);
 
     private:
     // this is a 3d array of cubes to represent the board. Good luck visualizing it
@@ -90,7 +90,7 @@ class Board{
     |            | /
     |____________|/
      */
-    std::array<std::array<std::array<Cube, BOARD_DIMS.z>, BOARD_DIMS.y>, BOARD_DIMS.x> cubes;
+    std::array<std::array<std::array<BOARD_TYPES::Cube, BOARD_DIMS.z>, BOARD_DIMS.y>, BOARD_DIMS.x> cubes;
 
     bool boardStateHasChanged;
 };
@@ -145,7 +145,7 @@ void Board<BOARD_DIMS>::SetCubeOccupation(const V3D &position, bool occupation){
 }
 
 template <const V3D &BOARD_DIMS>
-Cube ** Board<BOARD_DIMS>::SliceBoard(const V3D &column){
+BOARD_TYPES::Cube ** Board<BOARD_DIMS>::SliceBoard(const V3D &column){
     uint32_t columnLength{0};
     V3D indexIncriment{};
     V3D position{};
@@ -172,7 +172,7 @@ Cube ** Board<BOARD_DIMS>::SliceBoard(const V3D &column){
         break;
     }
 
-    Cube* columnSlice[columnLength];
+    BOARD_TYPES::Cube* columnSlice[columnLength];
     for(uint32_t i = 0; i < columnLength; i++){
         V3D cubePosition = indexIncriment * i + position;
         columnSlice[i] = &(this->cubes[cubePosition.x][cubePosition.y][cubePosition.z]);

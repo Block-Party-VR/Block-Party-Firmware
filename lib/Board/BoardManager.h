@@ -1,3 +1,7 @@
+/**
+ * @file BoardManager.h
+ * @brief Provides an easy way to manage a board
+ */
 #pragma once
 
 #include "Board.h"
@@ -11,12 +15,30 @@ class BoardManager{
 
     ~BoardManager() = default;
 
+    /**
+     * @brief Initialize the board control. This hsould be called during setup
+     */
     void Init();
 
+    /**
+     * @brief Read the board state and update the LED colors
+     */
     void Update();
 
+    /**
+     * @brief Set the color of one cube
+     * @param position the position of the cube
+     * @param color the oclor you want the cube to be
+     */
     void SetCubeColor(const V3D &position, const V3D &color);
 
+    /**
+     * @brief Set the color of one column of cubes. 
+     * A column is defined as x,y,z where z is the normal vector direction to a plane. 
+     * x,y is the column coordinate on the plane.
+     * @param column the column vector
+     * @param color the color you want the column to be
+     */
     void SetColumnColors(const V3D &column, const V3D *color);
 
 
@@ -29,10 +51,19 @@ class BoardManager{
      */
     void FillColumnColor(const V3D &column, const V3D &color);
 
+    /**
+     * @returns true if the board has changed state
+     */
     bool HasBoardChanged();
 
+    /**
+     * @brief Clear the board state changed flag
+     */
     void ClearBoardChanged();
 
+    /**
+     * @brief Get the board occupation state returned in the format a,b,c,d....
+     */
     String &Board2StackString();
 
     private:
@@ -89,7 +120,7 @@ void BoardManager<BOARD_DIMS>::Update(){
 
 template <const V3D &BOARD_DIMS>
 void BoardManager<BOARD_DIMS>::updateBoardColors(const V3D &column){
-    Cube ** cubeSlice{this->board.SliceBoard(column)};
+    BOARD_TYPES::Cube ** cubeSlice{this->board.SliceBoard(column)};
     uint32_t numCubes{this->getColumnHeight(static_cast<BOARD_TYPES::PLANE_NORMAL>(column.z))};
     this->driver.UpdateStackLEDs(BOARD_DIMS.x, cubeSlice, numCubes);
 }

@@ -11,7 +11,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 
-#include "Cube.h"
+#include "BoardTypes.h"
 #include "BoardTypes.h"
 
 template <uint32_t NUM_STACKS>
@@ -22,7 +22,10 @@ public:
      * @param stacks a reference to an array which contains information about the pins which control each cube stack.
      * @param pixelController a reference to a pre-constructed neopixel controller which will allow this driver to control neopixels
      */
-    BoardDriver(std::array<BOARD_TYPES::CubeStack, NUM_STACKS> &stacks, Adafruit_NeoPixel &pixelController);
+    BoardDriver(
+        std::array<BOARD_TYPES::CubeStack, NUM_STACKS> &stacks, 
+        Adafruit_NeoPixel &pixelController
+        );
     ~BoardDriver() = default;
 
     /**
@@ -52,7 +55,13 @@ public:
      * @param cubes an array of cube pointers which contain the color data you want to stream
      * @param numCubes the number of cubes in the cubes array
      */
-    void UpdateStackLEDs(uint32_t numXStacks, uint32_t X_COORD, uint32_t Y_COORD, Cube* cubes[], uint32_t numCubes);
+    void UpdateStackLEDs(
+        uint32_t numXStacks, 
+        uint32_t X_COORD, 
+        uint32_t Y_COORD, 
+        BOARD_TYPES::Cube* cubes[], 
+        uint32_t numCubes
+        );
 
     /**
      * @brief stream data to a single cube stack on the board
@@ -60,7 +69,11 @@ public:
      * @param cubes an array of cube pointers which contain the color data you want to stream
      * @param numCubes the number of cubes in the cubes array
      */
-    void UpdateStackLEDs(uint32_t stackIndex, Cube* cubes[], uint32_t numCubes);
+    void UpdateStackLEDs(
+        uint32_t stackIndex, 
+        BOARD_TYPES::Cube* cubes[], 
+        uint32_t numCubes
+        );
 
 
 private:
@@ -84,7 +97,10 @@ void BoardDriver<NUM_STACKS>::Init(){
 }
 
 template<uint32_t NUM_STACKS>
-BoardDriver<NUM_STACKS>::BoardDriver(std::array<BOARD_TYPES::CubeStack, NUM_STACKS> &stacks, Adafruit_NeoPixel &pixelController): 
+BoardDriver<NUM_STACKS>::BoardDriver(
+    std::array<BOARD_TYPES::CubeStack, NUM_STACKS> &stacks, 
+    Adafruit_NeoPixel &pixelController
+    ): 
 stacks(stacks),
 pixelController(pixelController)
 {
@@ -94,12 +110,22 @@ pixelController(pixelController)
 }
 
 template<uint32_t NUM_STACKS>
-void BoardDriver<NUM_STACKS>::UpdateStackLEDs(uint32_t numXStacks, uint32_t X_COORD, uint32_t Y_COORD, Cube* cubes[], uint32_t numCubes){
+void BoardDriver<NUM_STACKS>::UpdateStackLEDs(
+    uint32_t numXStacks, 
+    uint32_t X_COORD, 
+    uint32_t Y_COORD, 
+    BOARD_TYPES::Cube* cubes[], 
+    uint32_t numCubes
+    ){
     this->UpdateStackLEDs(this->xy2StackIndex(X_COORD, Y_COORD, numXStacks), cubes, numCubes);
 }
 
 template<uint32_t NUM_STACKS>
-void BoardDriver<NUM_STACKS>::UpdateStackLEDs(uint32_t stackIndex, Cube* cubes[], uint32_t numCubes){
+void BoardDriver<NUM_STACKS>::UpdateStackLEDs(
+    uint32_t stackIndex, 
+    BOARD_TYPES::Cube* cubes[], 
+    uint32_t numCubes
+    ){
     this->pixelController.setPin(this->stacks[stackIndex].ledPin);
     for(int i = 0; i < numCubes; i++){
         V3D color{cubes[i]->color};
@@ -110,7 +136,11 @@ void BoardDriver<NUM_STACKS>::UpdateStackLEDs(uint32_t stackIndex, Cube* cubes[]
 }
 
 template<uint32_t NUM_STACKS>
-uint32_t BoardDriver<NUM_STACKS>::GetNumberCubes(uint32_t numXStacks, uint32_t X_COORD, uint32_t Y_COORD){
+uint32_t BoardDriver<NUM_STACKS>::GetNumberCubes(
+    uint32_t numXStacks, 
+    uint32_t X_COORD, 
+    uint32_t Y_COORD
+    ){
     return this->GetNumberCubes(this->xy2StackIndex(X_COORD, Y_COORD, numXStacks));
 }
 
