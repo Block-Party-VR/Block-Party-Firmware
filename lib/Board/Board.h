@@ -79,6 +79,16 @@ class Board{
     uint32_t SliceBoard(const V3D &column, BOARD_TYPES::Cube ** sliceBuffer);
 
     void PrintEntireBoard() const;
+
+    void UpdateAllColors(const std::array<std::array<std::array<V3D, BOARD_DIMS.z>, BOARD_DIMS.y>, BOARD_DIMS.x>& colorFrame){
+        for(uint32_t x = 0; x < BOARD_DIMS.x; x++){
+            for(uint32_t y = 0; y < BOARD_DIMS.y; y++){
+                for(uint32_t z = 0; z < BOARD_DIMS.z; z++){
+                    this->cubes[x][y][z].color = colorFrame[x][y][z];
+                }
+            }
+        }
+    }
     private:
     // this is a 3d array of cubes to represent the board. Good luck visualizing it
     /*  _____________

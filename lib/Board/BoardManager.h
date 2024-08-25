@@ -7,11 +7,12 @@
 #include "Board.h"
 #include "BoardDriver.h"
 #include "Vector3D.h"
+#include "Animator.h"
 
 template <const V3D &BOARD_DIMS>
 class BoardManager{
     public:
-    BoardManager(BoardDriver<BOARD_WIDTH*BOARD_LENGTH> &boardDriver);
+    BoardManager(BoardDriver<BOARD_WIDTH*BOARD_LENGTH> &boardDriver, Animator<BOARD_DIMS> &animator);
 
     ~BoardManager() = default;
 
@@ -66,9 +67,12 @@ class BoardManager{
      */
     void Board2StackString(String& messageBuffer);
 
+    void FillColor(const V3D &color){this->board.FillColor(color);}
+
     private:
     BoardDriver<BOARD_WIDTH*BOARD_LENGTH> &driver;
     Board<BOARD_DIMS> board{};
+    Animator<BOARD_DIMS> &animator;
 
     void updateStackColors(const V3D &column);
 
@@ -88,11 +92,20 @@ class BoardManager{
     }
     }
 
+    void updateColorsFromAnimator();
+
 };
+template <const V3D &BOARD_DIMS>
+void BoardManager<BOARD_DIMS>::updateColorsFromAnimator(){
+    if(this->animator.HasInterpolatedFrameChanged()){
+        this->board.UpdateAllColors(this->animator.GetInterpolatedFrame());
+    }
+}
 
 template <const V3D &BOARD_DIMS>
-BoardManager<BOARD_DIMS>::BoardManager(BoardDriver<BOARD_WIDTH*BOARD_LENGTH> &boardDriver):
-    driver(boardDriver){}
+BoardManager<BOARD_DIMS>::BoardManager(BoardDriver<BOARD_WIDTH*BOARD_LENGTH> &boardDriver, Animator<BOARD_DIMS> &animator):
+    driver(boardDriver),
+    animator(animator){}
 
 template <const V3D &BOARD_DIMS>
 void BoardManager<BOARD_DIMS>::Init(){
@@ -101,6 +114,7 @@ void BoardManager<BOARD_DIMS>::Init(){
 
 template <const V3D &BOARD_DIMS>
 void BoardManager<BOARD_DIMS>::Update(){
+    this->updateColorsFromAnimator();
     // update the occupied cubes on the board and the cube colors
     for(uint32_t x = 0; x <  BOARD_DIMS.x; x++){
         for(uint32_t y = 0; y < BOARD_DIMS.y; y++){

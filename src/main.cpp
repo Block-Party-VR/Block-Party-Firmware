@@ -19,6 +19,9 @@
 #include "BoardDriver.h"
 #include "BoardTypes.h"
 
+#include "Animator.h"
+#include "TestFrames.h"
+
 // --------------------------------------------------
 // ----------------- VARIABLES ----------------------
 // --------------------------------------------------
@@ -31,8 +34,9 @@ SerialMessage<SERIAL_CHAR_LENGTH, SERIAL_ARG_LENGTH> serialMessage(&Serial);
 
 Adafruit_NeoPixel pixelController{BOARD_HEIGHT*2, STACK1_LED_PIN, NEO_GRB + NEO_KHZ800};
 
+Animator<BOARD_DIMENSIONS> animator{};
 BoardDriver<BOARD_WIDTH*BOARD_LENGTH> boardDriver{stacks, pixelController};
-BoardManager<BOARD_DIMENSIONS> boardManager{boardDriver};
+BoardManager<BOARD_DIMENSIONS> boardManager{boardDriver, animator};
 // --------------------------------------------------
 // ----------------- FUNCTIONS ----------------------
 // --------------------------------------------------
@@ -95,26 +99,31 @@ void parseData(Message<SERIAL_CHAR_LENGTH, SERIAL_ARG_LENGTH> &message){
   uint32_t argsLength{message.GetPopulatedArgs()};
   uint32_t command = args[0];
   switch(command){
-    case Commands::BoardState:
+    case Commands::BoardState:{
       printBoardState();
       break;
-    case Commands::PING:
+    }
+    case Commands::PING:{
       GlobalPrint::Println("!" + String(Commands::PING) + ";");
       break;
-    case Commands::SetStackColors:
+    }
+    case Commands::SetStackColors:{
       GlobalPrint::Println("!2;");
-      // TODO: replace this with the animator
-      // colorManager.Enable(false);
+      animator.isEnabled = false;
+      V3D black{};
+      boardManager.FillColor(black);
       SetStackColor(reinterpret_cast<uint32_t *>(args), argsLength);
       break;
-    case Commands::GoToIdle:
+    }
+    case Commands::GoToIdle:{
       GlobalPrint::Println("!3;");
-      // TODO: replace this with the animator
-      // colorManager.Enable(true);
+      animator.isEnabled = true;
       break;
-    default:
+    }
+    default:{
       GlobalPrint::Println("INVALID COMMAND");
       break;
+    }
   }
 
   // now that we have run the command we can clear the data for the next command.
@@ -155,6 +164,7 @@ void UpdateBoard(void * params){
       boardManager.ClearBoardChanged();
     }
 
+    animator.RunAnimation(updateTickRate);
     boardManager.Update();
 
     boardStateTimer += updateTickRate;
@@ -185,6 +195,8 @@ void setup() {
 
   Serial.println("Beginning Board Initializaiton");
   boardManager.Init();
+  animator.SetLoop(true);
+  animator.StartAnimation(&(TestFrames::testAnimationSequence1));
   xTaskCreate(UpdateBoard, "UpdateBoard", 10000, NULL, 0, &updateBoardTask);
 
   Serial.println("Setup Complete");
