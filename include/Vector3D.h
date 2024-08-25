@@ -5,6 +5,11 @@
 
 class V3D{
     public:
+    constexpr V3D(const V3D& other):
+    x(other.x),
+    y(other.y),
+    z(other.z){}
+    
     constexpr V3D(uint32_t x=0, uint32_t y=0, uint32_t z=0): 
     x(x), 
     y(y), 
@@ -17,36 +22,35 @@ class V3D{
         return *this;
     }
 
-    V3D& operator+(const V3D &other){
-        V3D vector{};
-        vector.x = this->x + other.x;
-        vector.y = this->y + other.y;
-        vector.z = this->z + other.z;
-        return vector;
+    V3D& operator+=(const V3D &other){
+        this->x += other.x;
+        this->y += other.y;
+        this->z += other.z;
+        return *this;
     }
 
-    V3D& operator-(const V3D &other){
-        V3D vector{};
-        vector.x = this->x - other.x;
-        vector.y = this->y - other.y;
-        vector.z = this->z - other.z;
-        return vector;
+    V3D& operator-=(const V3D &other){
+        this->x -= other.x;
+        this->y -= other.y;
+        this->z -= other.z;
+        return *this;
     }
 
-    V3D operator/(const uint32_t scalar){
-        V3D vector{};
-        vector.x = this->x / scalar;
-        vector.y = this->y / scalar;
-        vector.z = this->z / scalar;
-        return vector;
+    V3D& operator/=(const uint32_t scalar){
+        if(scalar == 0){
+            return *this;
+        }
+        this->x /= scalar;
+        this->y /= scalar;
+        this->z /= scalar;
+        return *this;
     }
 
-    V3D operator*(const uint32_t scalar){
-        V3D vector{};
-        vector.x = this->x * scalar;
-        vector.y = this->y * scalar;
-        vector.z = this->z * scalar;
-        return vector;
+    V3D& operator*=(const uint32_t scalar){
+        this->x *= scalar;
+        this->y *= scalar;
+        this->z *= scalar;
+        return *this;
     }
 
     bool operator==(const V3D &other){

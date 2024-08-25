@@ -21,6 +21,7 @@ class Board{
     constexpr const V3D &GetSize() const{return BOARD_DIMS;}
     constexpr uint32_t GetNumberCubes() const{return BOARD_DIMS.x * BOARD_DIMS.y * BOARD_DIMS.z;}
 
+    constexpr uint32_t GetMaxDimension(){return std::max(std::max(BOARD_DIMS.x, BOARD_DIMS.y), BOARD_DIMS.z);}
     /**
      * @brief Returns a string in the format:
      *  !a,b,c,d,e,f,g,h,i;
@@ -28,11 +29,6 @@ class Board{
      * @param stringBuffer the buffer to write the string into
      */
     void ToStackString(String& stringBuffer) const;
-
-    /**
-     * @returns Returns an array which contains how many cubes are in each z column on the board
-     */
-    std::array<uint32_t, BOARD_DIMS.x * BOARD_DIMS.y> &LinearizeBoard() const;
 
     /**
      * @brief fill the entire board with the given color
@@ -70,14 +66,19 @@ class Board{
     void SetStateChanged(bool boardState){this->boardStateHasChanged = boardState;}
 
     /**
-     * @brief Get a column along any axis
+     * @brief Get a column along any axis read into the sliceBuffer
      * @param column .z specifies the normal direction of the plane (see PLANE_NORMAL), and 
      * the x,y values specify the location of the column in that plane 
      * to fill. IE To fill one stack at 0,2 I would say give V3D(0,2,PLANE_NORMAL::Z)
-     * @returns an array of cubes along that column
+     * @param sliceBuffer an array of pointers to the cubes along that column
+     * @returns the number of elements written into the slice buffer
+     * @note That array is stored locally and will be overwritten everytime this function is called. 
+     * Also, any unused spots at the end of the array will be nullptrs
+     * @warning allocate the size of the slice buffer using GetMaxDimension if you don't know what you're doing!
      */
-    BOARD_TYPES::Cube ** SliceBoard(const V3D &column);
+    uint32_t SliceBoard(const V3D &column, BOARD_TYPES::Cube ** sliceBuffer);
 
+    void PrintEntireBoard() const;
     private:
     // this is a 3d array of cubes to represent the board. Good luck visualizing it
     /*  _____________
@@ -97,28 +98,25 @@ class Board{
 
 template <const V3D &BOARD_DIMS>
 void Board<BOARD_DIMS>::ToStackString(String &stringBuffer) const{
-    std::array<uint32_t, BOARD_DIMS.x*BOARD_DIMS.y> linearizedBoard = this->LinearizeBoard();
+    std::array<uint32_t, BOARD_DIMS.x * BOARD_DIMS.y> linearizedBoard;
+    for(uint32_t x{0}; x < BOARD_DIMS.x; x++){
+        for(uint32_t y{0}; y < BOARD_DIMS.y; y++){
+            uint32_t boardIndex{x + y*3};
+            linearizedBoard[boardIndex] = 0;
+            for(uint32_t z{0}; z < BOARD_DIMS.z; z++){
+                linearizedBoard[boardIndex] += this->cubes[x][y][z].isOccupied;
+            }
+        }
+    }
 
     stringBuffer += String(linearizedBoard[0]);
 
     for(uint32_t i = 0; i < BOARD_DIMS.x * BOARD_DIMS.y; i++){
         stringBuffer += "," + String(linearizedBoard[i]);
     }
-}
+    // TODO: Delete this before merging into develop
+    this->PrintEntireBoard();
 
-template <const V3D &BOARD_DIMS>
-std::array<uint32_t, BOARD_DIMS.x * BOARD_DIMS.y> & Board<BOARD_DIMS>::LinearizeBoard() const{
-    // convert the board into one array where each entry represents the height of one stack
-    std::array<uint32_t, BOARD_DIMS.x * BOARD_DIMS.y> linearizedBoard;
-    for(uint32_t x{0}; x < BOARD_DIMS.x; x++){
-        for(uint32_t y{0}; y < BOARD_DIMS.y; y++){
-            for(uint32_t z{0}; z < BOARD_DIMS.z; z++){
-                bool isOccupied{this->cubes[x][y][z].isOccupied};
-                linearizedBoard[x + y*3] += static_cast<uint32_t>(isOccupied);
-            }
-        }
-    }
-    return linearizedBoard;
 }
 
 template <const V3D &BOARD_DIMS>
@@ -145,39 +143,58 @@ void Board<BOARD_DIMS>::SetCubeOccupation(const V3D &position, bool occupation){
 }
 
 template <const V3D &BOARD_DIMS>
-BOARD_TYPES::Cube ** Board<BOARD_DIMS>::SliceBoard(const V3D &column){
+uint32_t Board<BOARD_DIMS>::SliceBoard(const V3D &column, BOARD_TYPES::Cube ** sliceBuffer){
     uint32_t columnLength{0};
-    V3D indexIncriment{};
-    V3D position{};
+    V3D indexIncrimentVector{};
+    V3D indexVector{};
+
     switch(column.z){
         case BOARD_TYPES::PLANE_NORMAL::X:
         columnLength = BOARD_DIMS.x;
-        indexIncriment.x = 1;
-        position.z = column.x;
-        position.y = column.y;
+        indexIncrimentVector.x = 1;
+        indexVector.z = column.x;
+        indexVector.y = column.y;
         break;
         case BOARD_TYPES::PLANE_NORMAL::Y:
         columnLength = BOARD_DIMS.y;
-        indexIncriment.y = 1;
-        position.x = column.x;
-        position.z = column.y;
+        indexIncrimentVector.y = 1;
+        indexVector.x = column.x;
+        indexVector.z = column.y;
         break;
 
         default:
         case BOARD_TYPES::PLANE_NORMAL::Z:
         columnLength = BOARD_DIMS.z;
-        indexIncriment.z = 1;
-        position.x = column.x;
-        position.y = column.y;
+        indexIncrimentVector.z = 1;
+        indexVector.x = column.x;
+        indexVector.y = column.y;
         break;
     }
 
-    BOARD_TYPES::Cube* columnSlice[columnLength];
     for(uint32_t i = 0; i < columnLength; i++){
-        V3D cubePosition = indexIncriment * i + position;
-        columnSlice[i] = &(this->cubes[cubePosition.x][cubePosition.y][cubePosition.z]);
+        if(indexVector.x >= BOARD_DIMS.x || indexVector.y >= BOARD_DIMS.y || indexVector.z >= BOARD_DIMS.z){
+            Serial.println("Board::SliceBoard: Index Out of Bounds:" + String(indexVector.x) + "," + String(indexVector.y) + "," + String(indexVector.z));
+            return 0;
+        }
+        sliceBuffer[i] = &(this->cubes[indexVector.x][indexVector.y][indexVector.z]);
+        indexVector += indexIncrimentVector;
     }
+    return columnLength;
+}
 
-    return columnSlice;
+template <const V3D &BOARD_DIMS>
+void Board<BOARD_DIMS>::PrintEntireBoard() const{
+    Serial.println("begin");
+
+    for(uint32_t x = 0; x < BOARD_DIMS.x; x++){
+        for(uint32_t y = 0; y < BOARD_DIMS.y; y++){
+            for(uint32_t z = 0; z < BOARD_DIMS.z; z++){
+                const BOARD_TYPES::Cube &cube = this->cubes[x][y][z];
+                Serial.print("Cube X:" + String(x) + ",Y:" + String(y) + ",Z:" + String(z));
+                Serial.print("\tColor R:" + String(cube.color.x) + ",G:" + String(cube.color.y) + ",B:" + String(cube.color.z));
+                Serial.println("\tOccupied? " + String(cube.isOccupied));
+            }
+        }
+    }
 }
 

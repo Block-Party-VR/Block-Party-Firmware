@@ -27,7 +27,7 @@ TaskHandle_t updateBoardTask;
 
 // BluetoothSerial SerialBT;
 // BluetoothSerialMessage serialMessageBT(&SerialBT);
-SerialMessage<500, 10> serialMessage(&Serial);
+SerialMessage<SERIAL_CHAR_LENGTH, SERIAL_ARG_LENGTH> serialMessage(&Serial);
 
 Adafruit_NeoPixel pixelController{BOARD_HEIGHT*2, STACK1_LED_PIN, NEO_GRB + NEO_KHZ800};
 
@@ -64,7 +64,9 @@ void SetupBluetoothModule(){
 
 void printBoardState(){
   GlobalPrint::Print("!0,");
-  GlobalPrint::Print(boardManager.Board2StackString());
+  String boardString;
+  boardManager.Board2StackString(boardString);
+  GlobalPrint::Print(boardString);
   GlobalPrint::Println(";");
 }
 
@@ -80,21 +82,21 @@ void SetStackColor(uint32_t * args, int argsLength){
   V3D colors[numColors];
   
   for(int i = 0; i < numColors; i++){
-    int red = args[2 + (i * 3)];
-    int green = args[3 + (i * 3)];
-    int blue = args[4 + (i * 3)];
+    uint32_t red = args[2 + (i * 3)];
+    uint32_t green = args[3 + (i * 3)];
+    uint32_t blue = args[4 + (i * 3)];
     colors[i] = V3D{red, green, blue};
   }
-
-  boardManager.SetColumnColors(V3D{X_COORD, Y_COORD, BOARD_TYPES::PLANE_NORMAL::Z}, colors);
+  boardManager.SetColumnColors(V3D{X_COORD, Y_COORD, BOARD_TYPES::PLANE_NORMAL::Z}, colors, numColors);
 }
 
-void parseData(Message<500, 10> &message){
+void parseData(Message<SERIAL_CHAR_LENGTH, SERIAL_ARG_LENGTH> &message){
   int32_t * args{message.GetArgs()};
-  uint32_t argsLength{message.GetArgsLength()};
+  uint32_t argsLength{message.GetPopulatedArgs()};
   uint32_t command = args[0];
   switch(command){
     case Commands::BoardState:
+      GlobalPrint::Println("Test");
       printBoardState();
       break;
     case Commands::PING:
@@ -154,7 +156,7 @@ void UpdateBoard(void * params){
       boardManager.ClearBoardChanged();
     }
 
-    boardManager.Update();
+    // boardManager.Update();
 
     boardStateTimer += updateTickRate;
     vTaskDelay(updateTickRate.count());

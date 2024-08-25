@@ -11,6 +11,10 @@
 #include "BoardTypes.h"
 #include "Vector3D.h"
 
+// define some important buffer sizes
+static constexpr uint32_t SERIAL_ARG_LENGTH{15};
+static constexpr uint32_t SERIAL_CHAR_LENGTH{SERIAL_ARG_LENGTH*10};
+
 // define the physical dimensions of the board
 static constexpr uint32_t BOARD_WIDTH{3};
 static constexpr uint32_t BOARD_LENGTH{3};

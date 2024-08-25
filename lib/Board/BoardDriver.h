@@ -90,6 +90,7 @@ template<uint32_t NUM_STACKS>
 void BoardDriver<NUM_STACKS>::Init(){
     for(uint32_t i = 0; i < NUM_STACKS; i++){
         pinMode(this->stacks[i].ledPin, OUTPUT);
+        filteredReadings[i] = 0;
     }
 
     // begin doesn't really do anything besides setting the pinmode
@@ -159,7 +160,6 @@ uint32_t BoardDriver<NUM_STACKS>::GetNumberCubes(uint32_t stackIndex){
             (static_cast<float>(this->filteredReadings[stackIndex]) * 0.9)
              + (static_cast<float>(value) * 0.1)
             );
-
     // temporary definitions to define value ranges:
     uint16_t zeroCubesHigh = 4095;
     uint16_t zeroCubesLow = 3400;
@@ -182,5 +182,6 @@ uint32_t BoardDriver<NUM_STACKS>::GetNumberCubes(uint32_t stackIndex){
         stackHeight = 3;
     }
     
+    this->filteredReadings[stackIndex] = lowPassADCRead;
     return stackHeight;
 }
