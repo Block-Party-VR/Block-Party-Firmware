@@ -96,7 +96,6 @@ void parseData(Message<SERIAL_CHAR_LENGTH, SERIAL_ARG_LENGTH> &message){
   uint32_t command = args[0];
   switch(command){
     case Commands::BoardState:
-      GlobalPrint::Println("Test");
       printBoardState();
       break;
     case Commands::PING:
@@ -156,7 +155,7 @@ void UpdateBoard(void * params){
       boardManager.ClearBoardChanged();
     }
 
-    // boardManager.Update();
+    boardManager.Update();
 
     boardStateTimer += updateTickRate;
     vTaskDelay(updateTickRate.count());

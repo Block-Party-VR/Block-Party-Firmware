@@ -149,15 +149,12 @@ void BoardManager<BOARD_DIMS>::SetColumnColors(const V3D &column, const V3D *col
 
     // create a cube pointer buffer and store a board slice into it
     BOARD_TYPES::Cube * slicedBoard[columnHeight];
-    Serial.println("moments before slicing");
     uint32_t sliceLength{this->board.SliceBoard(column, slicedBoard)};
 
-    Serial.println("setting colors");
     uint32_t maxIndex{std::min(numColors, columnHeight)};
     for(uint32_t i = 0; i < columnHeight; i++){
         slicedBoard[i]->color = color[i];
     }
-    Serial.println("End of SetColumnColors");
 }
 
 template <const V3D &BOARD_DIMS>

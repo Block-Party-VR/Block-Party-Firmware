@@ -114,9 +114,6 @@ void Board<BOARD_DIMS>::ToStackString(String &stringBuffer) const{
     for(uint32_t i = 0; i < BOARD_DIMS.x * BOARD_DIMS.y; i++){
         stringBuffer += "," + String(linearizedBoard[i]);
     }
-    // TODO: Delete this before merging into develop
-    this->PrintEntireBoard();
-
 }
 
 template <const V3D &BOARD_DIMS>
@@ -184,8 +181,6 @@ uint32_t Board<BOARD_DIMS>::SliceBoard(const V3D &column, BOARD_TYPES::Cube ** s
 
 template <const V3D &BOARD_DIMS>
 void Board<BOARD_DIMS>::PrintEntireBoard() const{
-    Serial.println("begin");
-
     for(uint32_t x = 0; x < BOARD_DIMS.x; x++){
         for(uint32_t y = 0; y < BOARD_DIMS.y; y++){
             for(uint32_t z = 0; z < BOARD_DIMS.z; z++){
