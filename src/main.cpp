@@ -197,7 +197,7 @@ void setup() {
   Serial.println("Beginning Board Initializaiton");
   boardManager.Init();
   animator.SetLoop(true);
-  animator.StartAnimation(&(TestFrames::testAnimationSequence1));
+  animator.StartAnimation(&(TestFrames::testAnimationSequence2));
   xTaskCreate(UpdateBoard, "UpdateBoard", 10000, NULL, 0, &updateBoardTask);
 
   Serial.println("Setup Complete");

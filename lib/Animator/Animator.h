@@ -238,7 +238,6 @@ V3D<uint32_t> Animator<BOARD_DIMS>::noFillInterpolate(const AnimationFrame &keyF
 
 template <const V3D<uint32_t> &BOARD_DIMS>
 V3D<uint32_t> Animator<BOARD_DIMS>::closestColorInterpolate(const AnimationFrame &keyFrame, V3D<uint32_t> cubePosition){
-    Serial.print("X:" + String(cubePosition.x) + ",Y:" + String(cubePosition.y) + ",Z:" + String(cubePosition.z));
     V3D<uint32_t> returnColor{keyFrame.frame[0].color};
     V3D<uint32_t> distance{keyFrame.frame[0].position};
     distance -= cubePosition;

@@ -30,8 +30,8 @@ namespace TestFrames{
     AnimationFrame noFillFrame{
         .frame = {
             CreateCell(0,0,0,red),
-            // CreateCell(0.5,0.5,0,green),
-            CreateCell(1,1,0,blue)
+            CreateCell(0.5,0.5,0.5,green),
+            CreateCell(1,1,1,blue)
         },
         .fillInterpolation = FillInterpolation::NO_FILL,
         .frameInterpolation = FrameInterpolation::SNAP,
@@ -41,8 +41,8 @@ namespace TestFrames{
     AnimationFrame closestColorFrame{
         .frame = {
             CreateCell(0,0,0,red),
-            // CreateCell(0.5,0.5,0,green),
-            CreateCell(1,1,0,blue)
+            CreateCell(0.5,0.5,0.5,green),
+            CreateCell(1,1,1,blue)
         },
         .fillInterpolation = FillInterpolation::CLOSEST_COLOR,
         .frameInterpolation = FrameInterpolation::SNAP,
@@ -52,8 +52,8 @@ namespace TestFrames{
     AnimationFrame linearFillFrame{
         .frame = {
             CreateCell(0,0,0,red),
-            // CreateCell(0.5,0.5,0,green),
-            CreateCell(1,1,0,blue)
+            CreateCell(0.5,0.5,0.5,green),
+            CreateCell(1,1,1,blue)
         },
         .fillInterpolation = FillInterpolation::LINEAR_WEIGHTED_DISTANCE,
         .frameInterpolation = FrameInterpolation::SNAP,
@@ -63,8 +63,8 @@ namespace TestFrames{
     AnimationFrame squareFillFrame{
         .frame = {
             CreateCell(0,0,0,red),
-            // CreateCell(0.5,0.5,0,green),
-            CreateCell(1,1,0,blue)
+            CreateCell(0.5,0.5,0.5,green),
+            CreateCell(1,1,1,blue)
         },
         .fillInterpolation = FillInterpolation::SQUARE_WEIGHTED_DISTANCE,
         .frameInterpolation = FrameInterpolation::SNAP,
@@ -74,8 +74,8 @@ namespace TestFrames{
     AnimationFrame noFillFadeFrame{
         .frame = {
             CreateCell(0,0,0,red),
-            // CreateCell(0.5,0.5,0,green),
-            CreateCell(1,1,0,blue)
+            CreateCell(0.5,0.5,0.5,green),
+            CreateCell(1,1,1,blue)
         },
         .fillInterpolation = FillInterpolation::NO_FILL,
         .frameInterpolation = FrameInterpolation::FADE,
@@ -85,8 +85,8 @@ namespace TestFrames{
     AnimationFrame closestColorFadeFrame{
         .frame = {
             CreateCell(0,0,0,red),
-            // CreateCell(0.5,0.5,0,green),
-            CreateCell(1,1,0,blue)
+            CreateCell(0.5,0.5,0.5,green),
+            CreateCell(1,1,1,blue)
         },
         .fillInterpolation = FillInterpolation::CLOSEST_COLOR,
         .frameInterpolation = FrameInterpolation::FADE,
@@ -96,8 +96,8 @@ namespace TestFrames{
     AnimationFrame linearFillFadeFrame{
         .frame = {
             CreateCell(0,0,0,red),
-            // CreateCell(0.5,0.5,0,green),
-            CreateCell(1,1,0,blue)
+            CreateCell(0.5,0.5,0.5,green),
+            CreateCell(1,1,1,blue)
         },
         .fillInterpolation = FillInterpolation::LINEAR_WEIGHTED_DISTANCE,
         .frameInterpolation = FrameInterpolation::FADE,
@@ -107,8 +107,8 @@ namespace TestFrames{
     AnimationFrame squareFillFadeFrame{
         .frame = {
             CreateCell(0,0,0,red),
-            // CreateCell(0.5,0.5,0,green),
-            CreateCell(1,1,0,blue)
+            CreateCell(0.5,0.5,0.5,green),
+            CreateCell(1,1,1,blue)
         },
         .fillInterpolation = FillInterpolation::SQUARE_WEIGHTED_DISTANCE,
         .frameInterpolation = FrameInterpolation::FADE,
@@ -123,7 +123,8 @@ namespace TestFrames{
         noFillFadeFrame, // 4
         closestColorFadeFrame, // 5
         linearFillFadeFrame, // 6
-        squareFillFadeFrame // 7
+        squareFillFadeFrame, // 7
+        noFillFrame // 8
     };
 
     AnimationFrame testFrame1{
