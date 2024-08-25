@@ -8,15 +8,15 @@ using namespace ANIMATION_TYPES;
 
 namespace TestFrames{
 
-    V3D red{255,0,0};
-    V3D green{0,255,0};
-    V3D blue{0,0,255};
+    V3D<uint32_t> red{255,0,0};
+    V3D<uint32_t> green{0,255,0};
+    V3D<uint32_t> blue{0,0,255};
     uint32_t maxValue{std::numeric_limits<uint32_t>::max()};
 
-    Cell CreateCell(float x_percent, float y_percent, float z_percent, V3D &color){
+    Cell CreateCell(float x_percent, float y_percent, float z_percent, V3D<uint32_t> &color){
         float continuousMaxValue{static_cast<float>(std::numeric_limits<uint32_t>::max())};
         Cell cell{
-            .position = V3D{
+            .position = V3D<uint32_t>{
                 static_cast<uint32_t>(continuousMaxValue*x_percent),
                 static_cast<uint32_t>(continuousMaxValue*y_percent),
                 static_cast<uint32_t>(continuousMaxValue*z_percent)
@@ -126,33 +126,43 @@ namespace TestFrames{
         squareFillFadeFrame // 7
     };
 
+    AnimationFrame testFrame1{
+        .frame = {
+            CreateCell(0,0,0,red),
+            // CreateCell(0.5,0.5,0,green),
+            CreateCell(1,1,0,blue)
+        },
+        .fillInterpolation = FillInterpolation::NO_FILL,
+        .frameInterpolation = FrameInterpolation::FADE,
+        .delay = std::chrono::milliseconds(10000)
+    };
 
-    AnimationFrame noFillFrame2{
+    AnimationFrame testFrame2{
         .frame = {
             CreateCell(0,1,0,red),
             // CreateCell(0.5,0.5,0,green),
             CreateCell(1,0,0,green)
         },
         .fillInterpolation = FillInterpolation::NO_FILL,
-        .frameInterpolation = FrameInterpolation::SNAP,
+        .frameInterpolation = FrameInterpolation::FADE,
         .delay = std::chrono::milliseconds(10000)
     };
 
-    AnimationFrame noFillFrame3{
+    AnimationFrame testFrame3{
         .frame = {
             CreateCell(0.5,0.5,0,red),
             // CreateCell(0.5,0.5,0,green),
             CreateCell(0,1,0,blue)
         },
         .fillInterpolation = FillInterpolation::NO_FILL,
-        .frameInterpolation = FrameInterpolation::SNAP,
+        .frameInterpolation = FrameInterpolation::FADE,
         .delay = std::chrono::milliseconds(10000)
     };
 
     std::vector<AnimationFrame> testAnimationSequence1{
-        noFillFrame,
-        noFillFrame2,
-        noFillFrame3,
-        noFillFrame3
+        testFrame1,
+        testFrame2,
+        testFrame3,
+        testFrame1
     };
 }

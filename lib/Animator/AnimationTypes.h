@@ -19,8 +19,8 @@ namespace ANIMATION_TYPES{
     };
 
     struct Cell{
-        V3D position;
-        V3D color;
+        V3D<uint32_t> position;
+        V3D<uint32_t> color;
     };
 
     // this contains all of the information to specify exactly how a single frame should look and fade to the next frame

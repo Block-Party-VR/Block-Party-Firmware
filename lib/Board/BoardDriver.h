@@ -129,7 +129,7 @@ void BoardDriver<NUM_STACKS>::UpdateStackLEDs(
     ){
     this->pixelController.setPin(this->stacks[stackIndex].ledPin);
     for(int i = 0; i < numCubes; i++){
-        V3D color{cubes[i]->color};
+        V3D<uint32_t> color{cubes[i]->color};
         this->pixelController.setPixelColor(i*2, this->pixelController.Color(color.x, color.y, color.z));
         this->pixelController.setPixelColor((i*2 + 1), this->pixelController.Color(color.x, color.y, color.z));
     }

@@ -20,7 +20,7 @@ namespace BOARD_TYPES{
     };
 
     struct Cube{
-        V3D color;
+        V3D<uint32_t> color;
         bool isOccupied{false};
     };
 };

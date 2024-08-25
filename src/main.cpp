@@ -83,15 +83,15 @@ void SetStackColor(uint32_t * args, int argsLength){
   uint32_t Y_COORD{(stackNum - X_COORD) / BOARD_DIMENSIONS.y};
 
   uint32_t numColors = (argsLength - 2) / 3;
-  V3D colors[numColors];
+  V3D<uint32_t> colors[numColors];
   
   for(int i = 0; i < numColors; i++){
     uint32_t red = args[2 + (i * 3)];
     uint32_t green = args[3 + (i * 3)];
     uint32_t blue = args[4 + (i * 3)];
-    colors[i] = V3D{red, green, blue};
+    colors[i] = V3D<uint32_t>{red, green, blue};
   }
-  boardManager.SetColumnColors(V3D{X_COORD, Y_COORD, BOARD_TYPES::PLANE_NORMAL::Z}, colors, numColors);
+  boardManager.SetColumnColors(V3D<uint32_t>{X_COORD, Y_COORD, BOARD_TYPES::PLANE_NORMAL::Z}, colors, numColors);
 }
 
 void parseData(Message<SERIAL_CHAR_LENGTH, SERIAL_ARG_LENGTH> &message){
@@ -110,7 +110,7 @@ void parseData(Message<SERIAL_CHAR_LENGTH, SERIAL_ARG_LENGTH> &message){
     case Commands::SetStackColors:{
       GlobalPrint::Println("!2;");
       animator.isEnabled = false;
-      V3D black{};
+      V3D<uint32_t> black{};
       boardManager.FillColor(black);
       SetStackColor(reinterpret_cast<uint32_t *>(args), argsLength);
       break;
@@ -157,14 +157,15 @@ void UpdateBoard(void * params){
   auto updateTickRate{std::chrono::milliseconds(8)};
   auto boardStateTimer{std::chrono::milliseconds(0)};
   auto boardStateMaxUpdatePeriod{std::chrono::milliseconds(34)}; // this is a little slower than 30fps
-
+  unsigned long accurateTimer{millis()};
   for(;;){
     if(boardStateTimer >= boardStateMaxUpdatePeriod && boardManager.HasBoardChanged()){
       printBoardState();
       boardManager.ClearBoardChanged();
     }
 
-    animator.RunAnimation(updateTickRate);
+    animator.RunAnimation(std::chrono::milliseconds(millis() - accurateTimer));
+    accurateTimer = millis();
     boardManager.Update();
 
     boardStateTimer += updateTickRate;

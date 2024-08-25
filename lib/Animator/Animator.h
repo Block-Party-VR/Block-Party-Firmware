@@ -13,11 +13,11 @@
 
 using namespace ANIMATION_TYPES;
 
-template <const V3D &BOARD_DIMS>
+template <const V3D<uint32_t> &BOARD_DIMS>
 class Animator{
 
 public:
-typedef std::array<std::array<std::array<V3D, BOARD_DIMS.z>, BOARD_DIMS.y>, BOARD_DIMS.x> Frame;
+typedef std::array<std::array<std::array<V3D<uint32_t>, BOARD_DIMS.z>, BOARD_DIMS.y>, BOARD_DIMS.x> Frame;
 
 
 void StartAnimation(const std::vector<AnimationFrame> *animationSequence);
@@ -26,15 +26,13 @@ void RunAnimation(const std::chrono::milliseconds& timePassed);
 
 void SetLoop(bool isLooping);
 
-bool HasInterpolatedFrameChanged(){return this->interpolatedFrameHasChanged;}
-
 Frame &GetInterpolatedFrame(){return this->interpolatedFrame;}
 
 bool isEnabled{true};
+bool interpolatedFrameHasChanged{false};
 
 private:
 bool isLooping{true};
-bool interpolatedFrameHasChanged{false};
 // these are the uncompressed frames you get by following the key colors and interpolation instructions of an animation frame
 Frame startFrame;
 Frame interpolatedFrame;
@@ -52,17 +50,17 @@ void copyFrame(Frame &copyFrom, Frame &copyTo){
     std::memcpy(&copyTo, &copyFrom, sizeof(Frame));
 }
 
-V3D getInterpolatedColor(const AnimationFrame &keyFrame, V3D position);
+V3D<uint32_t> getInterpolatedColor(const AnimationFrame &keyFrame, V3D<uint32_t> position);
 
-V3D keyFrame2BoardCoords(const V3D &keyFramePosition);
+V3D<uint32_t> keyFrame2BoardCoords(const V3D<uint32_t> &keyFramePosition);
 
-V3D noFillInterpolate(const AnimationFrame &keyFrame, V3D position);
+V3D<uint32_t> noFillInterpolate(const AnimationFrame &keyFrame, V3D<uint32_t> position);
 
-V3D closestColorInterpolate(const AnimationFrame &keyFrame, V3D position);
+V3D<uint32_t> closestColorInterpolate(const AnimationFrame &keyFrame, V3D<uint32_t> position);
 
-V3D linearInterpolate(const AnimationFrame &keyFrame, V3D position);
+V3D<uint32_t> linearInterpolate(const AnimationFrame &keyFrame, V3D<uint32_t> position);
 
-V3D squareInterpolate(const AnimationFrame &keyFrame, V3D position);
+V3D<uint32_t> squareInterpolate(const AnimationFrame &keyFrame, V3D<uint32_t> position);
 
 void PrintUncompressedFrame(){      
     for(uint32_t x = 0; x < BOARD_DIMS.x; x++){
@@ -78,7 +76,7 @@ void PrintUncompressedFrame(){
 
 };
 
-template <const V3D &BOARD_DIMS>
+template <const V3D<uint32_t> &BOARD_DIMS>
 void Animator<BOARD_DIMS>::StartAnimation(const std::vector<AnimationFrame> *animationSequence){
 
     this->animationSequence = animationSequence;
@@ -99,13 +97,13 @@ void Animator<BOARD_DIMS>::StartAnimation(const std::vector<AnimationFrame> *ani
         this->copyFrame(this->startFrame, this->interpolatedFrame);
         this->uncompressFrame((*this->animationSequence)[1], this->endFrame);
     }
-    this->PrintUncompressedFrame();
+    this->interpolatedFrameHasChanged = true;
 }
 
-template <const V3D &BOARD_DIMS>
+template <const V3D<uint32_t> &BOARD_DIMS>
 void Animator<BOARD_DIMS>::RunAnimation(const std::chrono::milliseconds& timePassed){
     if(!(this->isEnabled)){
-        this->interpolatedFrameHasChanged = false;
+        return;
     }
 
     auto delayTime = (*this->animationSequence)[this->animationIndex].delay;
@@ -118,19 +116,19 @@ void Animator<BOARD_DIMS>::RunAnimation(const std::chrono::milliseconds& timePas
 
     // don't do frame interpolations if we're doing snap fades
     if((*this->animationSequence)[this->animationIndex].frameInterpolation == FrameInterpolation::SNAP){
-        this->interpolatedFrameHasChanged = false;
+        return;
     }
 
     // linearly interpolate between the two uncompressed frames
     for(uint32_t x = 0; x < BOARD_DIMS.x; x++){
         for(uint32_t y = 0; y < BOARD_DIMS.y; y++){
             for(uint32_t z = 0; z < BOARD_DIMS.z; z++){
-                V3D startColor{this->startFrame[x][y][z]};
-                V3D endColor{this->endFrame[x][y][z]};
-                V3D difference{endColor}; 
+                V3D<float> startColor{this->startFrame[x][y][z]};
+                V3D<float> endColor{this->endFrame[x][y][z]};
+                V3D<float> difference{endColor}; 
                 difference -= startColor;
 
-                V3D interpolatedColor{difference};
+                V3D<float> interpolatedColor{difference};
                 interpolatedColor *= this->timeElapsed.count();
                 interpolatedColor /= delayTime.count();
                 interpolatedColor += startColor;
@@ -143,40 +141,40 @@ void Animator<BOARD_DIMS>::RunAnimation(const std::chrono::milliseconds& timePas
     this->interpolatedFrameHasChanged = true;
 }
 
-template <const V3D &BOARD_DIMS>
+template <const V3D<uint32_t> &BOARD_DIMS>
 void Animator<BOARD_DIMS>::SetLoop(bool isLooping){
     this->isLooping = isLooping;
 }
 
-template <const V3D &BOARD_DIMS>
+template <const V3D<uint32_t> &BOARD_DIMS>
 void Animator<BOARD_DIMS>::incrimentAnimationIndex(){
-    if(this->animationIndex < this->animationSequence->size() - 1){
+    if(this->animationIndex < this->animationSequence->size() - 2){
         this->animationIndex++;
         this->timeElapsed = std::chrono::milliseconds(0);
         this->uncompressFrame((*this->animationSequence)[this->animationIndex], this->startFrame);
+        this->copyFrame(this->startFrame, this->interpolatedFrame);
         this->uncompressFrame((*this->animationSequence)[this->animationIndex + 1], this->endFrame);
     }
-    else if(isLooping){
+    else{
         this->StartAnimation(this->animationSequence);
     }
 
-    Serial.println("Animator::incrimentAnimationIndex" + String(animationIndex));
-    this->PrintUncompressedFrame();
+    this->interpolatedFrameHasChanged = true;
 }
 
-template <const V3D &BOARD_DIMS>
+template <const V3D<uint32_t> &BOARD_DIMS>
 void Animator<BOARD_DIMS>::uncompressFrame(const AnimationFrame &keyFrame, Frame &frameBuffer){
     for(uint32_t x = 0; x < BOARD_DIMS.x; x++){
         for(uint32_t y = 0; y < BOARD_DIMS.y; y++){
             for(uint32_t z = 0; z < BOARD_DIMS.z; z++){
-                frameBuffer[x][y][z] = getInterpolatedColor(keyFrame, V3D(x, y, z));
+                frameBuffer[x][y][z] = getInterpolatedColor(keyFrame, V3D<uint32_t>(x, y, z));
             }
         }
     }
 }
 
-template <const V3D &BOARD_DIMS>
-V3D Animator<BOARD_DIMS>::getInterpolatedColor(const AnimationFrame &keyFrame, V3D position){
+template <const V3D<uint32_t> &BOARD_DIMS>
+V3D<uint32_t> Animator<BOARD_DIMS>::getInterpolatedColor(const AnimationFrame &keyFrame, V3D<uint32_t> position){
     switch(keyFrame.fillInterpolation){
         case FillInterpolation::NO_FILL:
             return noFillInterpolate(keyFrame, position);
@@ -187,19 +185,19 @@ V3D Animator<BOARD_DIMS>::getInterpolatedColor(const AnimationFrame &keyFrame, V
         case FillInterpolation::SQUARE_WEIGHTED_DISTANCE:
             return squareInterpolate(keyFrame, position);
         default:
-            V3D black{};
+            V3D<uint32_t> black{};
             return black;
     }
 }
 
-template <const V3D &BOARD_DIMS>
-V3D Animator<BOARD_DIMS>::keyFrame2BoardCoords(const V3D &keyFramePosition){
-    V3D returnValue{};
+template <const V3D<uint32_t> &BOARD_DIMS>
+V3D<uint32_t> Animator<BOARD_DIMS>::keyFrame2BoardCoords(const V3D<uint32_t> &keyFramePosition){
+    V3D<uint32_t> returnValue{};
     float maxValue{static_cast<float>(std::numeric_limits<uint32_t>::max())};
     // scale the key frame values down to be within board coordinates
-    float keyFrame_X = static_cast<float>(BOARD_DIMS.x) * static_cast<float>(keyFramePosition.x) / maxValue;
-    float keyFrame_Y = static_cast<float>(BOARD_DIMS.y) * static_cast<float>(keyFramePosition.y) / maxValue;
-    float keyFrame_Z = static_cast<float>(BOARD_DIMS.z) * static_cast<float>(keyFramePosition.z) / maxValue;
+    float keyFrame_X = static_cast<float>(BOARD_DIMS.x - 1) * static_cast<float>(keyFramePosition.x) / maxValue;
+    float keyFrame_Y = static_cast<float>(BOARD_DIMS.y - 1) * static_cast<float>(keyFramePosition.y) / maxValue;
+    float keyFrame_Z = static_cast<float>(BOARD_DIMS.z - 1) * static_cast<float>(keyFramePosition.z) / maxValue;
 
     // carefully quantize the float values back into ints with a precise rounding operation
     if(keyFrame_X - std::floor(keyFrame_X) < 0.5f){
@@ -226,9 +224,9 @@ V3D Animator<BOARD_DIMS>::keyFrame2BoardCoords(const V3D &keyFramePosition){
     return returnValue;
 }
 
-template <const V3D &BOARD_DIMS>
-V3D Animator<BOARD_DIMS>::noFillInterpolate(const AnimationFrame &keyFrame, V3D position){
-    V3D returnColor{};
+template <const V3D<uint32_t> &BOARD_DIMS>
+V3D<uint32_t> Animator<BOARD_DIMS>::noFillInterpolate(const AnimationFrame &keyFrame, V3D<uint32_t> position){
+    V3D<uint32_t> returnColor{};
     for(Cell cell : keyFrame.frame){
         if(keyFrame2BoardCoords(cell.position) == position){
             returnColor = cell.color;
@@ -238,34 +236,35 @@ V3D Animator<BOARD_DIMS>::noFillInterpolate(const AnimationFrame &keyFrame, V3D 
     return returnColor;
 }
 
-template <const V3D &BOARD_DIMS>
-V3D Animator<BOARD_DIMS>::closestColorInterpolate(const AnimationFrame &keyFrame, V3D position){
-    V3D returnColor{};
-    V3D distance{keyFrame.frame[0].position};
-    distance -= position;
+template <const V3D<uint32_t> &BOARD_DIMS>
+V3D<uint32_t> Animator<BOARD_DIMS>::closestColorInterpolate(const AnimationFrame &keyFrame, V3D<uint32_t> cubePosition){
+    Serial.print("X:" + String(cubePosition.x) + ",Y:" + String(cubePosition.y) + ",Z:" + String(cubePosition.z));
+    V3D<uint32_t> returnColor{keyFrame.frame[0].color};
+    V3D<uint32_t> distance{keyFrame.frame[0].position};
+    distance -= cubePosition;
     float closestDistance = distance.magnitude();
+
     for(Cell cell : keyFrame.frame){
         distance = keyFrame2BoardCoords(cell.position);
-        distance -= position;
+        distance -= cubePosition;
         float euclidDistance = distance.magnitude();
         if(euclidDistance < closestDistance){
             returnColor = cell.color;
             closestDistance = euclidDistance;
         }
     }
-
     return returnColor;
 }
 
-template <const V3D &BOARD_DIMS>
-V3D Animator<BOARD_DIMS>::linearInterpolate(const AnimationFrame &keyFrame, V3D position){
-    V3D returnColor{};
+template <const V3D<uint32_t> &BOARD_DIMS>
+V3D<uint32_t> Animator<BOARD_DIMS>::linearInterpolate(const AnimationFrame &keyFrame, V3D<uint32_t> position){
+    V3D<uint32_t> returnColor{};
 
     for(Cell cell : keyFrame.frame){
-        V3D vectorDistance{keyFrame2BoardCoords(cell.position)};
+        V3D<uint32_t> vectorDistance{keyFrame2BoardCoords(cell.position)};
         vectorDistance -= position;
-        uint32_t distance = static_cast<uint32_t>(vectorDistance.magnitude());
-        if(distance == 0) distance = 1;
+        float distance = vectorDistance.magnitude();
+        if(distance == 0) return cell.color;
         returnColor += cell.color;
         returnColor /= distance;
     }
@@ -275,16 +274,16 @@ V3D Animator<BOARD_DIMS>::linearInterpolate(const AnimationFrame &keyFrame, V3D 
     return returnColor;
 }
 
-template <const V3D &BOARD_DIMS>
-V3D Animator<BOARD_DIMS>::squareInterpolate(const AnimationFrame &keyFrame, V3D position){
-    V3D returnColor{};
+template <const V3D<uint32_t> &BOARD_DIMS>
+V3D<uint32_t> Animator<BOARD_DIMS>::squareInterpolate(const AnimationFrame &keyFrame, V3D<uint32_t> position){
+    V3D<uint32_t> returnColor{};
 
     for(Cell cell : keyFrame.frame){
-        V3D vectorDistance{keyFrame2BoardCoords(cell.position)};
+        V3D<uint32_t> vectorDistance{keyFrame2BoardCoords(cell.position)};
         vectorDistance -= position;
         uint32_t distance = static_cast<uint32_t>(vectorDistance.magnitude());
         distance *= distance;
-        if(distance == 0) distance = 1;
+        if(distance == 0) return cell.color;
         returnColor += cell.color;
         returnColor /= distance;
     }
