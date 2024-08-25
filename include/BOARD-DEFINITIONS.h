@@ -20,7 +20,7 @@ static constexpr uint32_t BOARD_WIDTH{3};
 static constexpr uint32_t BOARD_LENGTH{3};
 static constexpr uint32_t BOARD_HEIGHT{3};
 
-static constexpr V3D BOARD_DIMENSIONS{BOARD_WIDTH, BOARD_LENGTH, BOARD_HEIGHT};
+static constexpr V3D<uint32_t> BOARD_DIMENSIONS{BOARD_WIDTH, BOARD_LENGTH, BOARD_HEIGHT};
 
 // define the number of stacks
 static constexpr uint32_t NUMBER_STACKS{BOARD_WIDTH * BOARD_LENGTH};
