@@ -68,6 +68,7 @@ class BoardManager{
     void Board2StackString(String& messageBuffer);
 
     void FillColor(const V3D<uint32_t> &color){this->board.FillColor(color);}
+    void PrintColorState(){this->board.PrintEntireBoard();}
 
     private:
     BoardDriver<BOARD_WIDTH*BOARD_LENGTH> &driver;
@@ -167,7 +168,7 @@ void BoardManager<BOARD_DIMS>::SetColumnColors(const V3D<uint32_t> &column, cons
     uint32_t sliceLength{this->board.SliceBoard(column, slicedBoard)};
 
     uint32_t maxIndex{std::min(numColors, columnHeight)};
-    for(uint32_t i = 0; i < columnHeight; i++){
+    for(uint32_t i = 0; i < maxIndex; i++){
         slicedBoard[i]->color = color[i];
     }
 }

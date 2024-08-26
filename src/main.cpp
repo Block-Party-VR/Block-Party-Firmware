@@ -4,6 +4,7 @@
 #include <FreeRTOS.h>
 #include <Adafruit_NeoPixel.h>
 #include <chrono>
+#include <array>
 
 // Static Defines
 #include "PINOUT.h"
@@ -21,12 +22,18 @@
 
 #include "Animator.h"
 #include "TestFrames.h"
+#include "Animation.h"
 
 // --------------------------------------------------
 // ----------------- VARIABLES ----------------------
 // --------------------------------------------------
 TaskHandle_t updateCommunicaitonTask;
 TaskHandle_t updateBoardTask;
+
+std::array<std::vector<AnimationFrame>*, 2> animations = {
+  &RisingCubes::rising,
+  &RotatingCubes::rotating,
+};
 
 // BluetoothSerial SerialBT;
 // BluetoothSerialMessage serialMessageBT(&SerialBT);
@@ -158,17 +165,33 @@ void UpdateBoard(void * params){
   auto boardStateTimer{std::chrono::milliseconds(0)};
   auto boardStateMaxUpdatePeriod{std::chrono::milliseconds(34)}; // this is a little slower than 30fps
   unsigned long accurateTimer{millis()};
+  auto changeAnimationTimer{std::chrono::milliseconds(0)};
+  uint8_t currentAnimation{0};
+
   for(;;){
+    auto actualTimePassed{std::chrono::milliseconds(millis() - accurateTimer)};
+    accurateTimer = millis();
+
     if(boardStateTimer >= boardStateMaxUpdatePeriod && boardManager.HasBoardChanged()){
       printBoardState();
       boardManager.ClearBoardChanged();
+      boardStateTimer = std::chrono::milliseconds(0);
     }
 
-    animator.RunAnimation(std::chrono::milliseconds(millis() - accurateTimer));
-    accurateTimer = millis();
+    if(changeAnimationTimer >= std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::minutes(1))){
+      changeAnimationTimer = std::chrono::milliseconds(0);
+      currentAnimation++;
+      if(currentAnimation >= animations.size()){
+        currentAnimation = 0;
+      }
+      animator.StartAnimation(animations[currentAnimation]);
+    }
+
+    animator.RunAnimation(actualTimePassed);
     boardManager.Update();
 
-    boardStateTimer += updateTickRate;
+    boardStateTimer += actualTimePassed;
+    changeAnimationTimer += actualTimePassed;
     vTaskDelay(updateTickRate.count());
   }
   Serial.println("UpdateBoard task has ended unexpectedly!");
@@ -197,7 +220,7 @@ void setup() {
   Serial.println("Beginning Board Initializaiton");
   boardManager.Init();
   animator.SetLoop(true);
-  animator.StartAnimation(&(TestFrames::testAnimationSequence2));
+  animator.StartAnimation(animations[0]);
   xTaskCreate(UpdateBoard, "UpdateBoard", 10000, NULL, 0, &updateBoardTask);
 
   Serial.println("Setup Complete");

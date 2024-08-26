@@ -121,7 +121,7 @@ void Board<BOARD_DIMS>::ToStackString(String &stringBuffer) const{
 
     stringBuffer += String(linearizedBoard[0]);
 
-    for(uint32_t i = 0; i < BOARD_DIMS.x * BOARD_DIMS.y; i++){
+    for(uint32_t i = 1; i < BOARD_DIMS.x * BOARD_DIMS.y; i++){
         stringBuffer += "," + String(linearizedBoard[i]);
     }
 }
