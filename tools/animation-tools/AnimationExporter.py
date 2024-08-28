@@ -68,7 +68,7 @@ def mesh_to_cell(mesh: Mesh) -> Cell:
     cell = Cell(pos, Vector3(mesh.face_color))
     return cell
 
-def scene_to_frame(scene: Scene) -> str:
+def scene_to_frame(scene: Scene, scene_number: int) -> str:
     cells = [mesh_to_cell(cube) for cube in scene.meshes]
     frame = AnimationFrame(cells, FillInterpolation.NO_FILL, FrameInterpolation.FADE, 1000)
-    return frame.to_string(0)
+    return frame.to_string(scene_number)

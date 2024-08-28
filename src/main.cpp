@@ -30,7 +30,8 @@
 TaskHandle_t updateCommunicaitonTask;
 TaskHandle_t updateBoardTask;
 
-std::array<std::vector<AnimationFrame>*, 2> animations = {
+// WARNING! This array size should always be equal to the number of entries in it!!
+std::array<std::vector<AnimationFrame>*, 1> animations = {
   &RisingCubes::rising,
   // &RotatingCubes::rotating,
 };
