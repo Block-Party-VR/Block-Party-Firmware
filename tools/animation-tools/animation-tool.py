@@ -4,6 +4,8 @@ import pygame_widgets
 from Shapes import *
 from Scene import Scene
 from CustomWidgets import ColorPicker
+from pygame_widgets.button import Button
+from AnimationExporter import scene_to_frame
             
 
 # generate a list of cubes
@@ -17,10 +19,19 @@ for origin in product([-1, 0, 1],[-1, 0, 1],[-1, 0, 1]):
 
 scene = Scene(meshes, 90, 5)
 
+WINDOW_W = 500
+WINDOW_H = 500
+
+def save_frame_to_file(frame_data=""):
+    frame_data += scene_to_frame(scene)
+    print(frame_data)
+    with open("tools/animation-tools/output.txt", 'w') as file:
+        file.write(frame_data)
 
 pygame.init()
-window = pygame.display.set_mode((500, 500))
+window = pygame.display.set_mode((WINDOW_W, WINDOW_H))
 colorPicker = ColorPicker(window, 20, 20, 100, 300)
+save_button = Button(window, 20, WINDOW_H-40, 60, 30, text="Save",onClick=save_frame_to_file)
 clock = pygame.time.Clock()
 selected_meshes = []
 run = True

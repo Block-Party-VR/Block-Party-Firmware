@@ -18,6 +18,12 @@ class Mesh():
     def calculate_average_z(self, vertices):
         return [(i, sum([vertices[j].z for j in f]) / len(f)) for i, f in enumerate(self.__faces)]
 
+    def get_average_position(self):
+        vertex_sum: Vector3 = Vector3()
+        for vertex in self.__vertices:
+            vertex_sum += vertex
+        return vertex_sum / len(self.__vertices)
+    
     def get_face(self, index):
         return self.__faces[index]
     def get_vertices(self):

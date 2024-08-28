@@ -13,7 +13,7 @@ namespace AnimationHelpers{
     V3D<uint8_t> cyan{0,255,255};
     V3D<uint8_t> magenta{255,0,255};
 
-    Cell CreateCell(float x_percent, float y_percent, float z_percent, V3D<uint8_t> &color){
+    Cell CreateCell(float x_percent, float y_percent, float z_percent, const V3D<uint8_t> &color){
         float continuousMaxValue{static_cast<float>(std::numeric_limits<uint32_t>::max())};
         Cell cell{
             .position = V3D<uint32_t>{
@@ -211,11 +211,27 @@ namespace RisingCubes{
         .delay = std::chrono::milliseconds(1)
     };
 
+    AnimationFrame frame0{
+        .frame = {
+            CreateCell(0.0,0.0,0.0,V3D<uint8_t>(255.0,255.0,255.0)),
+            CreateCell(0.0,0.5,0.0,V3D<uint8_t>(0.0,255.0,0.0)),
+            CreateCell(0.0,1.0,0.0,V3D<uint8_t>(0.0,255.0,0.0)),
+            CreateCell(0.0,0.0,0.5,V3D<uint8_t>(0.0,0.0,255.0)),
+            CreateCell(0.0,0.0,1.0,V3D<uint8_t>(0.0,0.0,255.0)),
+            CreateCell(0.5,0.0,0.0,V3D<uint8_t>(255.0,0.0,0.0)),
+            CreateCell(1.0,0.0,0.0,V3D<uint8_t>(255.0,0.0,0.0))
+        },
+        .fillInterpolation = FillInterpolation::NO_FILL,
+        .frameInterpolation = FrameInterpolation::FADE,
+        .delay = std::chrono::milliseconds(1000)
+    };
+
     std::vector<AnimationFrame> rising{
-        frame1, // 0
-        frame2, // 1
-        frame3, // 2
-        frame4, // 3
-        frame5
+        frame0, frame0
+        // frame1, // 0
+        // frame2, // 1
+        // frame3, // 2
+        // frame4, // 3
+        // frame5
     };
 }

@@ -32,7 +32,7 @@ TaskHandle_t updateBoardTask;
 
 std::array<std::vector<AnimationFrame>*, 2> animations = {
   &RisingCubes::rising,
-  &RotatingCubes::rotating,
+  // &RotatingCubes::rotating,
 };
 
 // BluetoothSerial SerialBT;
@@ -112,6 +112,7 @@ void parseData(Message<SERIAL_CHAR_LENGTH, SERIAL_ARG_LENGTH> &message){
     }
     case Commands::PING:{
       GlobalPrint::Println("!" + String(Commands::PING) + ";");
+      boardManager.PrintColorState();
       break;
     }
     case Commands::SetStackColors:{
