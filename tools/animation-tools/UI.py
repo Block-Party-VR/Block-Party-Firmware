@@ -44,7 +44,7 @@ class SceneManager:
     def save_frame_to_file(self):
         with open("tools/animation-tools/output.txt", 'w') as file:
             for i, scene in enumerate(self._scenes):
-                file.write(scene_to_frame(scene.scene, scene.fill_interpolation, scene.frame_interpolation, scene.delay, i))
+                file.write(scene_to_frame(scene.scene, scene.fill, scene.fade, scene.delay, i))
 
     def generate_meshes(self) -> list[Mesh]:
         # generate a list of cubes
@@ -131,7 +131,8 @@ class AnimatorUI:
         self.updateOptions = False
         self._set_dropdown_options()
         
-        # TODO: add delay field
+        self.delay_text_entry: TextBox = TextBox(self.window, *self.rel2abs(30, 5, 60, 7), placeholderText="Transition Time (ms)", onSubmit=self.set_update_options_flag)
+        
         # Make a frame counter as a button but make it not look like a button
         default_color=(150,150,150)
         self.frame_counter_text: Button = Button(self.window, *self.rel2abs(15, 90, 10, 10), text="0", inactiveColour=default_color, hoverColour=default_color, pressedColour=default_color)
@@ -201,4 +202,9 @@ class AnimatorUI:
     
     def set_scene_options(self):
         self.updateOptions = False
-        self.sceneManager.update_scene_options(self.fill_dropdown.getSelected(), self.fade_dropdown.getSelected(), 1000)
+        delay_time = 1000
+        try:
+            delay_time = int(self.delay_text_entry.getText())
+        except ValueError:
+            self.delay_text_entry.setText(str(delay_time))
+        self.sceneManager.update_scene_options(self.fill_dropdown.getSelected(), self.fade_dropdown.getSelected(), delay_time)

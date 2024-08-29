@@ -34,8 +34,10 @@ class AnimationFrame:
     
     def to_string(self, frame_number: int):
         cell_str = ""
-        for cell in self.cells:
+        for i, cell in enumerate(self.cells):
             if cell.color.x != 0 or cell.color.y != 0 or cell.color.z != 0:
+                if i != 0:
+                    cell_str += "\t\t"
                 cell_str += cell.to_string() + "\n\t"
         cell_str = cell_str[:-3]
         message = f"""
@@ -72,5 +74,5 @@ def mesh_to_cell(mesh: Mesh) -> Cell:
 
 def scene_to_frame(scene: Scene, fill_interpolation: FillInterpolation, frame_interpolation: FrameInterpolation, delay: int, scene_number: int) -> str:
     cells = [mesh_to_cell(cube) for cube in scene.meshes]
-    frame = AnimationFrame(cells, FillInterpolation.NO_FILL, FrameInterpolation.FADE, 1000)
+    frame = AnimationFrame(cells, fill_interpolation, frame_interpolation, delay)
     return frame.to_string(scene_number)
