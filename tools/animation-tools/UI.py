@@ -132,7 +132,9 @@ class AnimatorUI:
         self._set_dropdown_options()
         
         # TODO: add delay field
-        # TODO: Make a frame counter
+        # Make a frame counter as a button but make it not look like a button
+        default_color=(150,150,150)
+        self.frame_counter_text: Button = Button(self.window, *self.rel2abs(15, 90, 10, 10), text="0", inactiveColour=default_color, hoverColour=default_color, pressedColour=default_color)
     
     def rel2abs(self, x: float, y: float, width: float, height: float) -> tuple[int,int,int,int]:
         scr_wdt, scr_hgt = self.window.get_size()
@@ -173,13 +175,16 @@ class AnimatorUI:
     def _next_scene(self):
         self.sceneManager.next_scene()
         self._set_dropdown_options()
+        self.frame_counter_text.setText(str(self.sceneManager._current_scene_idx))
         
         
     def _last_scene(self):
         self.sceneManager.last_scene()
         self._set_dropdown_options()
+        self.frame_counter_text.setText(str(self.sceneManager._current_scene_idx))
     
     def _set_dropdown_options(self):
+        # cursed method to set dropdown options because for some reason pygame_widgets dropdown doesn't allow you to manually set the dropdown option
         scene = self.sceneManager.get_current_scene()
         for choice in self.fill_dropdown._Dropdown__choices:
             if choice.text.find(scene.fill) != -1:
@@ -197,4 +202,3 @@ class AnimatorUI:
     def set_scene_options(self):
         self.updateOptions = False
         self.sceneManager.update_scene_options(self.fill_dropdown.getSelected(), self.fade_dropdown.getSelected(), 1000)
-        current_scene = self.sceneManager.get_current_scene()
