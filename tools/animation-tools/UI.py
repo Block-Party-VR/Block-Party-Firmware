@@ -2,7 +2,6 @@ from AnimationExporter import scene_to_frame
 from CustomWidgets import ColorPicker
 from itertools import product
 from pygame_widgets.button import Button
-import pygame_widgets
 from Scene import Scene
 from Shapes import *
 import pygame
@@ -15,13 +14,7 @@ class SceneManager:
         self.window = window
         self.color_picker = color_picker
         self._selected_meshes: list[Mesh] = []
-        self.make_buttons()
     
-    def make_buttons(self):
-        scr_wdt, scr_hgt = self.window.get_size()
-        self.save_button = Button(self.window, 20, scr_hgt-40, 60, 30, text="Save",onClick=self.save_frame_to_file)
-        self.next_frame_button = Button(self.window, scr_wdt-120, scr_hgt-40, 120, 30, text="Next Frame",onClick=self.next_scene)
-        self.last_frame_button = Button(self.window, scr_wdt-240, scr_hgt-40, 120, 30, text="last Frame",onClick=self.previous_scene)
     def save_frame_to_file(self):
         with open("tools/animation-tools/output.txt", 'w') as file:
             for i, scene in enumerate(self._scenes):
@@ -83,9 +76,38 @@ class SceneManager:
             self._current_scene_idx -= 1
             self.get_current_scene().euler_angles = [angle for angle in current_angles]
             self.deselect_all_mesh()
+
+class AnimatorUI:
+    def __init__(self, window):
+        scr_wdt, scr_hgt = window.get_size()
         
-def create_ui(window, scr_wdt, scr_hgt) -> SceneManager:
-    colorPicker = ColorPicker(window, 20, 20, 100, 300)
-    sceneManager = SceneManager(window, colorPicker)
+        self.window = window
+        colorPicker: ColorPicker = ColorPicker(self.window, 20, 20, 100, 300)
+        self.sceneManager: SceneManager = SceneManager(window, colorPicker)
+        
+        
+        self.save_button: Button = Button(self.window, 20, scr_hgt-40, 60, 30, text="Save",onClick=self.sceneManager.save_frame_to_file)
+        self.next_frame_button: Button = Button(self.window, scr_wdt-120, scr_hgt-40, 120, 30, text="Next Frame",onClick=self.sceneManager.next_scene)
+        self.last_frame_button: Button = Button(self.window, scr_wdt-240, scr_hgt-40, 120, 30, text="last Frame",onClick=self.sceneManager.previous_scene)
+        self.trackMouseMotion: bool = False
     
-    return sceneManager
+    def update_interaction(self, game_event):
+        if not self.trackMouseMotion:
+            pygame.mouse.get_rel()
+        
+        if game_event.type == pygame.MOUSEBUTTONDOWN:
+            if game_event.button == 2: # middle mouse click
+                self.trackMouseMotion = True
+            elif game_event.button == 1: # left click
+                self.sceneManager.click_mesh(pygame.mouse.get_pos())
+        elif game_event.type == pygame.MOUSEBUTTONUP:
+            if game_event.button == 2: # middle mouse release
+                self.trackMouseMotion = False
+        elif self.trackMouseMotion and game_event.type == pygame.MOUSEMOTION:
+            mouseMovement = pygame.mouse.get_rel()
+            current_scene = self.sceneManager.get_current_scene()
+            current_scene.euler_angles[0] -= mouseMovement[1]
+            current_scene.euler_angles[1] -= mouseMovement[0]
+    
+    def draw(self):
+        self.sceneManager.draw()
