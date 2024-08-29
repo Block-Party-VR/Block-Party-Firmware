@@ -8,10 +8,12 @@ class FillInterpolation(StrEnum):
     CLOSEST_COLOR = "CLOSEST_COLOR"
     LINEAR_WEIGHTED_DISTANCE = "LINEAR_WEIGHTED_DISTANCE"
     SQUARE_WEIGHTED_DISTANCE = "SQUARE_WEIGHTED_DISTANCE"
+    # options = [NO_FILL, CLOSEST_COLOR, LINEAR_WEIGHTED_DISTANCE, SQUARE_WEIGHTED_DISTANCE]
 
 class FrameInterpolation(StrEnum):
     SNAP = "SNAP"
     FADE = "FADE"
+    # options = [SNAP, FADE]
 
 class Cell:
     def __init__(self, position: Vector3, color: Vector3):
@@ -68,7 +70,7 @@ def mesh_to_cell(mesh: Mesh) -> Cell:
     cell = Cell(pos, Vector3(mesh.face_color))
     return cell
 
-def scene_to_frame(scene: Scene, scene_number: int) -> str:
+def scene_to_frame(scene: Scene, fill_interpolation: FillInterpolation, frame_interpolation: FrameInterpolation, delay: int, scene_number: int) -> str:
     cells = [mesh_to_cell(cube) for cube in scene.meshes]
     frame = AnimationFrame(cells, FillInterpolation.NO_FILL, FrameInterpolation.FADE, 1000)
     return frame.to_string(scene_number)

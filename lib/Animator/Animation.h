@@ -211,23 +211,38 @@ namespace RisingCubes{
         .delay = std::chrono::milliseconds(1)
     };
 
-    AnimationFrame frame0{
+    AnimationFrame frame00{
         .frame = {
-            CreateCell(0.0,0.0,0.0,V3D<uint8_t>(255.0,255.0,255.0)),
-            CreateCell(0.0,0.5,0.0,V3D<uint8_t>(0.0,255.0,0.0)),
-            CreateCell(0.0,1.0,0.0,V3D<uint8_t>(0.0,255.0,0.0)),
-            CreateCell(0.0,0.0,0.5,V3D<uint8_t>(0.0,0.0,255.0)),
-            CreateCell(0.0,0.0,1.0,V3D<uint8_t>(0.0,0.0,255.0)),
-            CreateCell(0.5,0.0,0.0,V3D<uint8_t>(255.0,0.0,0.0)),
-            CreateCell(1.0,0.0,0.0,V3D<uint8_t>(255.0,0.0,0.0))
+            CreateCell(0.0,0.0,1.0,V3D<uint8_t>(128.0,128.0,255.0)),
+            CreateCell(0.5,0.0,1.0,V3D<uint8_t>(128.0,128.0,255.0)),
+            CreateCell(1.0,0.0,0.0,V3D<uint8_t>(255.0,118.0,205.0)),
+            CreateCell(1.0,0.0,0.5,V3D<uint8_t>(255.0,118.0,205.0)),
+            CreateCell(1.0,0.0,1.0,V3D<uint8_t>(255.0,116.0,0.0)),
+            CreateCell(1.0,0.5,1.0,V3D<uint8_t>(183.0,0.0,255.0)),
+            CreateCell(1.0,1.0,1.0,V3D<uint8_t>(183.0,0.0,255.0))
         },
-        .fillInterpolation = FillInterpolation::NO_FILL,
+        .fillInterpolation = FillInterpolation::CLOSEST_COLOR,
+        .frameInterpolation = FrameInterpolation::FADE,
+        .delay = std::chrono::milliseconds(1000)
+    }; 
+        
+    AnimationFrame frame01{
+        .frame = {
+            CreateCell(0.0,0.0,1.0,V3D<uint8_t>(255.0,255.0,171.0)),
+            CreateCell(0.5,0.0,1.0,V3D<uint8_t>(255.0,255.0,171.0)),
+            CreateCell(1.0,0.0,0.0,V3D<uint8_t>(0.0,195.0,88.0)),
+            CreateCell(1.0,0.0,0.5,V3D<uint8_t>(0.0,195.0,88.0)),
+            CreateCell(1.0,0.0,1.0,V3D<uint8_t>(0.0,195.0,88.0)),
+            CreateCell(1.0,0.5,1.0,V3D<uint8_t>(112.0,222.0,255.0)),
+            CreateCell(1.0,1.0,1.0,V3D<uint8_t>(112.0,222.0,255.0))
+        },
+        .fillInterpolation = FillInterpolation::CLOSEST_COLOR,
         .frameInterpolation = FrameInterpolation::FADE,
         .delay = std::chrono::milliseconds(1000)
     };
 
     std::vector<AnimationFrame> rising{
-        frame0, frame0
+        frame00, frame01, frame00
         // frame1, // 0
         // frame2, // 1
         // frame3, // 2

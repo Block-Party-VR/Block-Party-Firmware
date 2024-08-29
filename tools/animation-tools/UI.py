@@ -1,15 +1,41 @@
-from AnimationExporter import scene_to_frame
-from CustomWidgets import ColorPicker
 from itertools import product
 from pygame_widgets.button import Button
+from pygame_widgets.slider import Slider
+from pygame_widgets.dropdown import Dropdown
+from pygame_widgets.textbox import TextBox
 from Scene import Scene
 from Shapes import *
 import pygame
+from AnimationExporter import *
 
+class ColorPicker:
+    def __init__(self, screen, x_pos: int, y_pos: int, width: int, height: int):
+        width = max(50, width)
+        slider_colors = ((255,0,0),(0,255,0),(0,0,255))
+        self.sliders: list[Slider] = [
+            Slider(screen, int(x_pos + i*(width/3)), y_pos, int((width-50)/3), height, min=0, max=255, step=1, vertical=True, handleColour=slider_colors[i]) for i in range(3)
+            ]
+        for slider in self.sliders:
+            slider.enable()
+    
+    def get_color(self) -> tuple[int]:
+        return tuple([slider.getValue() for slider in self.sliders])
+
+    def set_color(self, color: tuple[int]):
+        for i, slider in enumerate(self.sliders):
+            slider.setValue(color[i])
+
+class SceneStore:
+    def __init__(self, scene: Scene, fill: FillInterpolation, fade: FrameInterpolation, delay: int):
+        self.scene: Scene = scene
+        self.fill: FillInterpolation = fill
+        self.fade: FrameInterpolation = fade
+        self.delay: int = delay
+         
 class SceneManager:
     def __init__(self, window, color_picker: ColorPicker):     
         self.file_data: str = ""
-        self._scenes: list[Scene] = [self.new_scene()]
+        self._scenes: list[SceneStore] = [SceneStore(self.new_scene(), FillInterpolation.NO_FILL, FrameInterpolation.FADE, 1000)]
         self._current_scene_idx: int = 0
         self.window = window
         self.color_picker = color_picker
@@ -18,7 +44,7 @@ class SceneManager:
     def save_frame_to_file(self):
         with open("tools/animation-tools/output.txt", 'w') as file:
             for i, scene in enumerate(self._scenes):
-                file.write(scene_to_frame(scene, i))
+                file.write(scene_to_frame(scene.scene, scene.fill_interpolation, scene.frame_interpolation, scene.delay, i))
 
     def generate_meshes(self) -> list[Mesh]:
         # generate a list of cubes
@@ -37,13 +63,13 @@ class SceneManager:
     def draw(self):
         for mesh in self._selected_meshes:
             mesh.set_face_color(self.color_picker.get_color())
-        self.get_current_scene().draw(self.window)
+        self.get_current_scene().scene.draw(self.window)
     
-    def get_current_scene(self) -> Scene:
+    def get_current_scene(self) -> SceneStore:
         return self._scenes[self._current_scene_idx]
     
     def click_mesh(self, coordinates: tuple[int, int]):
-        mesh = self.get_current_scene().get_mesh_from_xy(coordinates)
+        mesh = self.get_current_scene().scene.get_mesh_from_xy(coordinates)
         
         if mesh == None:
             return
@@ -62,34 +88,60 @@ class SceneManager:
     
     def next_scene(self):
         self.deselect_all_mesh()
-        current_angles = self.get_current_scene().euler_angles
+        current_angles = self.get_current_scene().scene.euler_angles
         if len(self._scenes)-1 == self._current_scene_idx:
-            self._scenes.append(self.new_scene())
+            self._scenes.append(SceneStore(self.new_scene(), FillInterpolation.NO_FILL, FrameInterpolation.FADE, 1000))
             
         self._current_scene_idx += 1
         
-        self.get_current_scene().euler_angles = [angle for angle in current_angles]
+        self.get_current_scene().scene.euler_angles = [angle for angle in current_angles]
     
-    def previous_scene(self):
+    def last_scene(self):
         if self._current_scene_idx > 0:
-            current_angles = self.get_current_scene().euler_angles
+            current_angles = self.get_current_scene().scene.euler_angles
             self._current_scene_idx -= 1
-            self.get_current_scene().euler_angles = [angle for angle in current_angles]
+            self.get_current_scene().scene.euler_angles = [angle for angle in current_angles]
             self.deselect_all_mesh()
-
+    
+    def update_scene_options(self, fill: FillInterpolation, fade: FrameInterpolation, delay: int):
+        cur_scene: SceneStore = self.get_current_scene()
+        cur_scene.fill = fill
+        cur_scene.fade = fade
+        cur_scene.delay = delay
+            
 class AnimatorUI:
     def __init__(self, window):
         scr_wdt, scr_hgt = window.get_size()
         
         self.window = window
-        colorPicker: ColorPicker = ColorPicker(self.window, 20, 20, 100, 300)
-        self.sceneManager: SceneManager = SceneManager(window, colorPicker)
+        self.colorPicker: ColorPicker = ColorPicker(self.window, *self.rel2abs(5, 5, 20, 60))
+        self.sceneManager: SceneManager = SceneManager(window, self.colorPicker)
         
-        
-        self.save_button: Button = Button(self.window, 20, scr_hgt-40, 60, 30, text="Save",onClick=self.sceneManager.save_frame_to_file)
-        self.next_frame_button: Button = Button(self.window, scr_wdt-120, scr_hgt-40, 120, 30, text="Next Frame",onClick=self.sceneManager.next_scene)
-        self.last_frame_button: Button = Button(self.window, scr_wdt-240, scr_hgt-40, 120, 30, text="last Frame",onClick=self.sceneManager.previous_scene)
+        self.save_button: Button = Button(self.window, *self.rel2abs(5, 90, 10, 10), text="Save",onClick=self.sceneManager.save_frame_to_file)
+        self.next_frame_button: Button = Button(self.window, *self.rel2abs(75, 90, 25, 5), text="Next Frame",onClick=self._next_scene)
+        self.last_frame_button: Button = Button(self.window, *self.rel2abs(50, 90, 25, 5), text="last Frame",onClick=self._last_scene)
         self.trackMouseMotion: bool = False
+        
+        self.fill_dropdown: Dropdown = Dropdown(self.window, *self.rel2abs(30, 0, 40, 5), name="Fill Type",
+                                      choices=[option.value for option in FillInterpolation], onRelease=self.set_update_options_flag)
+        
+        self.fade_dropdown: Dropdown = Dropdown(self.window, *self.rel2abs(70, 0, 20, 5), name="Fade Type",
+                                      choices=[option.value for option in FrameInterpolation], onRelease=self.set_update_options_flag)
+        
+        self.updateOptions = False
+        self._set_dropdown_options()
+        
+        # TODO: add delay field
+        # TODO: Make a frame counter
+    
+    def rel2abs(self, x: float, y: float, width: float, height: float) -> tuple[int,int,int,int]:
+        scr_wdt, scr_hgt = self.window.get_size()
+        x_abs = int(x*scr_wdt/100)
+        y_abs = int(y*scr_hgt/100)
+        w_abs = int(width*scr_wdt/100)
+        h_abs = int(height*scr_hgt/100)
+        return (x_abs, y_abs, w_abs, h_abs)
+        
     
     def update_interaction(self, game_event):
         if not self.trackMouseMotion:
@@ -110,4 +162,39 @@ class AnimatorUI:
             current_scene.euler_angles[1] -= mouseMovement[0]
     
     def draw(self):
+        if self.updateOptions:
+            self.set_scene_options()
+        # make the preview window for the color picker
+        pygame.draw.rect(self.window, self.colorPicker.get_color(), self.rel2abs(11, 70, 5, 5))
+        pygame.draw.rect(self.window, (0,0,0), self.rel2abs(11, 70, 5, 5), 2)
+        
         self.sceneManager.draw()
+    
+    def _next_scene(self):
+        self.sceneManager.next_scene()
+        self._set_dropdown_options()
+        
+        
+    def _last_scene(self):
+        self.sceneManager.last_scene()
+        self._set_dropdown_options()
+    
+    def _set_dropdown_options(self):
+        scene = self.sceneManager.get_current_scene()
+        for choice in self.fill_dropdown._Dropdown__choices:
+            if choice.text.find(scene.fill) != -1:
+                self.fill_dropdown.chosen = choice
+                break
+        
+        for choice in self.fade_dropdown._Dropdown__choices:
+            if choice.text.find(scene.fade) != -1:
+                self.fade_dropdown.chosen = choice
+                break
+    
+    def set_update_options_flag(self):
+        self.updateOptions = True    
+    
+    def set_scene_options(self):
+        self.updateOptions = False
+        self.sceneManager.update_scene_options(self.fill_dropdown.getSelected(), self.fade_dropdown.getSelected(), 1000)
+        current_scene = self.sceneManager.get_current_scene()

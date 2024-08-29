@@ -1,7 +1,6 @@
 import pygame
 import pygame_widgets
 from Shapes import *
-from Scene import Scene
 from UI import AnimatorUI
 
 WINDOW_W = 500
