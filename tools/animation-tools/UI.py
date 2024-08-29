@@ -118,8 +118,8 @@ class AnimatorUI:
         self.sceneManager: SceneManager = SceneManager(window, self.colorPicker)
         
         self.save_button: Button = Button(self.window, *self.rel2abs(5, 90, 10, 10), text="Save",onClick=self.sceneManager.save_frame_to_file)
-        self.next_frame_button: Button = Button(self.window, *self.rel2abs(75, 90, 25, 5), text="Next Frame",onClick=self._next_scene)
-        self.last_frame_button: Button = Button(self.window, *self.rel2abs(50, 90, 25, 5), text="last Frame",onClick=self._last_scene)
+        self.next_frame_button: Button = Button(self.window, *self.rel2abs(75, 95, 25, 5), text="Next Frame",onClick=self._next_scene)
+        self.last_frame_button: Button = Button(self.window, *self.rel2abs(50, 95, 25, 5), text="last Frame",onClick=self._last_scene)
         self.trackMouseMotion: bool = False
         
         self.fill_dropdown: Dropdown = Dropdown(self.window, *self.rel2abs(30, 0, 40, 5), name="Fill Type",
@@ -135,7 +135,7 @@ class AnimatorUI:
         
         # Make a frame counter as a button but make it not look like a button
         default_color=(150,150,150)
-        self.frame_counter_text: Button = Button(self.window, *self.rel2abs(15, 90, 10, 10), text="0", inactiveColour=default_color, hoverColour=default_color, pressedColour=default_color)
+        self.frame_counter_text: Button = Button(self.window, *self.rel2abs(70, 85, 10, 10), text="0", inactiveColour=default_color, hoverColour=default_color, pressedColour=default_color)
     
     def rel2abs(self, x: float, y: float, width: float, height: float) -> tuple[int,int,int,int]:
         scr_wdt, scr_hgt = self.window.get_size()
@@ -161,8 +161,8 @@ class AnimatorUI:
         elif self.trackMouseMotion and game_event.type == pygame.MOUSEMOTION:
             mouseMovement = pygame.mouse.get_rel()
             current_scene = self.sceneManager.get_current_scene()
-            current_scene.euler_angles[0] -= mouseMovement[1]
-            current_scene.euler_angles[1] -= mouseMovement[0]
+            current_scene.scene.euler_angles[0] -= mouseMovement[1]
+            current_scene.scene.euler_angles[1] -= mouseMovement[0]
     
     def draw(self):
         if self.updateOptions:
