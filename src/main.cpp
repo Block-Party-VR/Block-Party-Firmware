@@ -30,9 +30,10 @@
 TaskHandle_t updateCommunicaitonTask;
 TaskHandle_t updateBoardTask;
 
-std::array<std::vector<AnimationFrame>*, 2> animations = {
+// WARNING! This array size should always be equal to the number of entries in it!!
+std::array<std::vector<AnimationFrame>*, 1> animations = {
   &RisingCubes::rising,
-  &RotatingCubes::rotating,
+  // &RotatingCubes::rotating,
 };
 
 // BluetoothSerial SerialBT;
@@ -112,6 +113,7 @@ void parseData(Message<SERIAL_CHAR_LENGTH, SERIAL_ARG_LENGTH> &message){
     }
     case Commands::PING:{
       GlobalPrint::Println("!" + String(Commands::PING) + ";");
+      boardManager.PrintColorState();
       break;
     }
     case Commands::SetStackColors:{
