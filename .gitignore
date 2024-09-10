@@ -1,2 +1,13 @@
 .pio
 .vscode
+*.lck
+
+Schematics/Block-Party/Block-Party-Main-Board/production/
+Schematics/Block-Party/Block-Party-Cube-Top-Board/production
+Schematics/Block-Party/Block-Party-Cube-Bottom-Board/production
+
+Schematics/Block-Party/Block-Party-Main-Board/Block-Party-Main-Board-backups/
+Schematics/Block-Party/Block-Party-Cube-Bottom-Board/Block-Party-Bottom-Board-backups/
+Schematics/Block-Party/Block-Party-Cube-Top-Board/Block-Party-Cube-Top-Board-backups/
+
+platformio-local.ini

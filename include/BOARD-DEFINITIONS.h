@@ -4,32 +4,67 @@
 */
 
 #pragma once
+#include <cstdint>
+#include <array>
 
 #include "PINOUT.h"
-#include "CubeStack.h"
+#include "BoardTypes.h"
+#include "Vector3D.h"
+
+// define some important buffer sizes
+static constexpr uint32_t SERIAL_ARG_LENGTH{15};
+static constexpr uint32_t SERIAL_CHAR_LENGTH{SERIAL_ARG_LENGTH*10};
 
 // define the physical dimensions of the board
-#define BOARD_WIDTH 3
-#define BOARD_LENGTH 3
-#define BOARD_HEIGHT 3
+static constexpr uint32_t BOARD_WIDTH{3};
+static constexpr uint32_t BOARD_LENGTH{3};
+static constexpr uint32_t BOARD_HEIGHT{3};
+
+static constexpr V3D<uint32_t> BOARD_DIMENSIONS{BOARD_WIDTH, BOARD_LENGTH, BOARD_HEIGHT};
 
 // define the number of stacks
-#define NUMBER_STACKS BOARD_WIDTH * BOARD_LENGTH
+static constexpr uint32_t NUMBER_STACKS{BOARD_WIDTH * BOARD_LENGTH};
 
 // define the CubeStacks
-CubeStack stack1(STACK1_ADC_PIN, STACK1_LED_PIN, BOARD_HEIGHT);
-CubeStack stack2(STACK2_ADC_PIN, STACK2_LED_PIN, BOARD_HEIGHT);
-CubeStack stack3(STACK3_ADC_PIN, STACK3_LED_PIN, BOARD_HEIGHT);
-CubeStack stack4(STACK4_ADC_PIN, STACK4_LED_PIN, BOARD_HEIGHT);
-CubeStack stack5(STACK5_ADC_PIN, STACK5_LED_PIN, BOARD_HEIGHT);
-CubeStack stack6(STACK6_ADC_PIN, STACK6_LED_PIN, BOARD_HEIGHT);
-CubeStack stack7(STACK7_ADC_PIN, STACK7_LED_PIN, BOARD_HEIGHT);
-CubeStack stack8(STACK8_ADC_PIN, STACK8_LED_PIN, BOARD_HEIGHT);
-CubeStack stack9(STACK9_ADC_PIN, STACK9_LED_PIN, BOARD_HEIGHT);
+static BOARD_TYPES::CubeStack stack1{
+    .adcPin=STACK1_ADC_PIN, 
+    .ledPin=STACK1_LED_PIN
+};
+static BOARD_TYPES::CubeStack stack2{
+    .adcPin=STACK2_ADC_PIN, 
+    .ledPin=STACK2_LED_PIN
+};
+static BOARD_TYPES::CubeStack stack3{
+    .adcPin=STACK3_ADC_PIN, 
+    .ledPin=STACK3_LED_PIN
+};
+static BOARD_TYPES::CubeStack stack4{
+    .adcPin=STACK4_ADC_PIN, 
+    .ledPin=STACK4_LED_PIN
+};
+static BOARD_TYPES::CubeStack stack5{
+    .adcPin=STACK5_ADC_PIN, 
+    .ledPin=STACK5_LED_PIN
+};
+static BOARD_TYPES::CubeStack stack6{
+    .adcPin=STACK6_ADC_PIN, 
+    .ledPin=STACK6_LED_PIN
+};
+static BOARD_TYPES::CubeStack stack7{
+    .adcPin=STACK7_ADC_PIN, 
+    .ledPin=STACK7_LED_PIN
+};
+static BOARD_TYPES::CubeStack stack8{
+    .adcPin=STACK8_ADC_PIN, 
+    .ledPin=STACK8_LED_PIN
+};
+static BOARD_TYPES::CubeStack stack9{
+    .adcPin=STACK9_ADC_PIN, 
+    .ledPin=STACK9_LED_PIN
+};
 
-// define the array of stacks
-CubeStack * stacks[] = {
-    &stack1, &stack2, &stack3,
-    &stack4, &stack5, &stack6,
-    &stack7, &stack8, &stack9
+static std::array<BOARD_TYPES::CubeStack, NUMBER_STACKS> stacks{
+    stack1, stack2, stack3, 
+    stack4, stack5, stack6, 
+    stack7, stack8, stack9
 };
