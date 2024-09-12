@@ -31,9 +31,9 @@ TaskHandle_t updateCommunicaitonTask;
 TaskHandle_t updateBoardTask;
 
 // WARNING! This array size should always be equal to the number of entries in it!!
-std::array<std::vector<AnimationFrame>*, 1> animations = {
+std::array<std::vector<AnimationFrame>*, 2> animations = {
   &RisingCubes::rising,
-  // &RotatingCubes::rotating,
+  &RotatingCubes::rotating,
 };
 
 // BluetoothSerial SerialBT;
