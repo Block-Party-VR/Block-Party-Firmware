@@ -15,6 +15,7 @@
 #include "BluetoothSerial.h"
 #include "SerialMessage.h"
 #include "GlobalPrint.h"
+#include "CommandHandler.h"
 
 #include "BoardManager.h"
 #include "BoardDriver.h"
@@ -35,6 +36,8 @@ std::array<std::vector<AnimationFrame>*, 1> animations = {
   &RisingCubes::rising,
   // &RotatingCubes::rotating,
 };
+
+CommandHandler commandHandler{};
 
 // BluetoothSerial SerialBT;
 // BluetoothSerialMessage serialMessageBT(&SerialBT);
@@ -73,7 +76,6 @@ void SetupBluetoothModule(){
   delay(100);
 }
 
-
 void printBoardState(){
   GlobalPrint::Print("!0,");
   String boardString;
@@ -82,7 +84,7 @@ void printBoardState(){
   GlobalPrint::Println(";");
 }
 
-void SetStackColor(uint32_t * args, int argsLength){
+void SetStackColor(uint32_t * args, uint32_t argsLength){
   uint32_t stackNum = args[1];
   uint32_t X_COORD{stackNum};
   while(X_COORD > BOARD_DIMENSIONS.x - 1){
@@ -102,43 +104,6 @@ void SetStackColor(uint32_t * args, int argsLength){
   boardManager.SetColumnColors(V3D<uint32_t>{X_COORD, Y_COORD, BOARD_TYPES::PLANE_NORMAL::Z}, colors, numColors);
 }
 
-void parseData(Message<SERIAL_CHAR_LENGTH, SERIAL_ARG_LENGTH> &message){
-  int32_t * args{message.GetArgs()};
-  uint32_t argsLength{message.GetPopulatedArgs()};
-  uint32_t command = args[0];
-  switch(command){
-    case Commands::BoardState:{
-      printBoardState();
-      break;
-    }
-    case Commands::PING:{
-      GlobalPrint::Println("!" + String(Commands::PING) + ";");
-      boardManager.PrintColorState();
-      break;
-    }
-    case Commands::SetStackColors:{
-      GlobalPrint::Println("!2;");
-      animator.isEnabled = false;
-      V3D<uint32_t> black{};
-      boardManager.FillColor(black);
-      SetStackColor(reinterpret_cast<uint32_t *>(args), argsLength);
-      break;
-    }
-    case Commands::GoToIdle:{
-      GlobalPrint::Println("!3;");
-      animator.isEnabled = true;
-      break;
-    }
-    default:{
-      GlobalPrint::Println("INVALID COMMAND");
-      break;
-    }
-  }
-
-  // now that we have run the command we can clear the data for the next command.
-  serialMessage.ClearNewData();
-}
-
 // --------------------------------------------------
 // ----------------- FREERTOS TASKS -----------------
 // --------------------------------------------------
@@ -148,12 +113,14 @@ void UpdateCommunication(void * params){
     // DO serial processing
     serialMessage.Update();
     if(serialMessage.IsNewData()){
-      parseData(serialMessage);
+      // TODO: Is it really a good idea to cast to unsigned here? do we ever use signed values? Find out.
+      commandHandler.ProcessCommand(reinterpret_cast<uint32_t *>(serialMessage.GetArgs()), serialMessage.GetPopulatedArgs());
+      serialMessage.ClearNewData();
     }
     // serialMessageBT.Update();
     // if(serialMessageBT.IsNewData()){
-    //   parseData(serialMessageBT.GetArgs(), serialMessageBT.GetArgsLength());
-    //   serialMessageBT.ClearNewData();
+    //   commandHandler.ProcessCommand(reinterpret_cast<uint32_t *>(serialMessage.GetArgs()), serialMessage.GetPopulatedArgs());
+    //   serialMessage.ClearNewData();
     // }
     vTaskDelay(3);
   }
@@ -213,6 +180,37 @@ void setup() {
   Serial.println("Configuring Bluetooth Adapter");
   SetupBluetoothModule();
   Serial.begin(9600);
+
+  // TODO: We should define these as functions and not lambdas because I think these get 
+  // destroyed once the setup function exits and that will break everything
+  // register the commands with the command handler
+  commandHandler.RegisterCommand(Commands::BoardState, [](uint32_t * /*args*/, uint32_t /*argsLength*/){
+    printBoardState();
+    return CommandHandler::CommandStatus::SUCCESS;
+  });
+
+  // create a lambda function to handle the ping command which calls GlobalPrint::Println("!" + String(Commands::PING) + ";");
+  commandHandler.RegisterCommand(Commands::PING, [](uint32_t * /*args*/, uint32_t /*argsLength*/){
+    GlobalPrint::Println("!" + String(Commands::PING) + ";");
+    return CommandHandler::CommandStatus::SUCCESS;
+  });
+
+  commandHandler.RegisterCommand(Commands::SetStackColors, [](uint32_t * args, uint32_t argsLength){
+    GlobalPrint::Println("!2;");
+    animator.isEnabled = false;
+    V3D<uint32_t> black{};
+    boardManager.FillColor(black);
+    SetStackColor(reinterpret_cast<uint32_t *>(args), argsLength);
+    return CommandHandler::CommandStatus::SUCCESS;
+  });
+
+  commandHandler.RegisterCommand(Commands::GoToIdle, [](uint32_t * /*args*/, uint32_t /*argsLength*/){
+    GlobalPrint::Println("!3;");
+    animator.isEnabled = true;
+    return CommandHandler::CommandStatus::SUCCESS;
+  });
+
+
 
   Serial.println("Configuring communication methods");
   serialMessage.Init(9600);
