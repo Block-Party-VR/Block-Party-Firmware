@@ -3,7 +3,7 @@
 CommandHandler::CommandHandler(){
     for(uint32_t i = 0; i < MAX_COMMAND_SIZE; i++){
         commandCallbacks[i] = nullptr;
-        commandCallbackIDs[i] = 0;
+        commandCallbackIDs[i] = -1;
     }
 }
 
@@ -30,6 +30,10 @@ bool CommandHandler::RemoveCommand(uint32_t commandID){
 }
 
 CommandHandler::CommandStatus CommandHandler::ProcessCommand(uint32_t * command, uint32_t commandSize){
+    if(commandSize == 0){
+        return CommandStatus::INVALID;
+    }
+    
     uint32_t commandID{command[0]};
     // get a pointer to the second element in the array because the first element is the command ID
     uint32_t * args{&(command[1])};

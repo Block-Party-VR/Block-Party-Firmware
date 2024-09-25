@@ -39,8 +39,6 @@ public:
 
 private:
     static constexpr uint32_t MAX_COMMAND_SIZE{10};
-    // pointer to the head of the command array
-    uint32_t * command{nullptr};
 
     // an array of command callbacks
     CommandCallback commandCallbacks[MAX_COMMAND_SIZE];

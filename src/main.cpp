@@ -104,6 +104,34 @@ void SetStackColor(uint32_t * args, uint32_t argsLength){
   boardManager.SetColumnColors(V3D<uint32_t>{X_COORD, Y_COORD, BOARD_TYPES::PLANE_NORMAL::Z}, colors, numColors);
 }
 
+// command handling functions
+CommandHandler::CommandStatus BoardStateCommandHandler(uint32_t * /*args*/, uint32_t /*argsLength*/){
+  printBoardState();
+  return CommandHandler::CommandStatus::SUCCESS;
+}
+
+CommandHandler::CommandStatus PingCommandHandler(uint32_t * /*args*/, uint32_t /*argsLength*/){
+  GlobalPrint::Println("!" + String(Commands::PING) + ";");
+  return CommandHandler::CommandStatus::SUCCESS;
+}
+
+CommandHandler::CommandStatus SetColorCommandHandler(uint32_t * args, uint32_t argsLength){
+  GlobalPrint::Println("!2;");
+  animator.isEnabled = false;
+  V3D<uint32_t> black{};
+  boardManager.FillColor(black);
+  SetStackColor(reinterpret_cast<uint32_t *>(args), argsLength);
+  return CommandHandler::CommandStatus::SUCCESS;
+}
+
+CommandHandler::CommandStatus GoToIdleCommandHandler(uint32_t * /*args*/, uint32_t /*argsLength*/){
+  GlobalPrint::Println("!3;");
+  animator.isEnabled = true;
+  return CommandHandler::CommandStatus::SUCCESS;
+}
+
+
+
 // --------------------------------------------------
 // ----------------- FREERTOS TASKS -----------------
 // --------------------------------------------------
@@ -113,7 +141,7 @@ void UpdateCommunication(void * params){
     // DO serial processing
     serialMessage.Update();
     if(serialMessage.IsNewData()){
-      // TODO: Is it really a good idea to cast to unsigned here? do we ever use signed values? Find out.
+      // We reinterpret cast the args to a uint32_t pointer because we know that the args will always be positive
       commandHandler.ProcessCommand(reinterpret_cast<uint32_t *>(serialMessage.GetArgs()), serialMessage.GetPopulatedArgs());
       serialMessage.ClearNewData();
     }
@@ -181,36 +209,11 @@ void setup() {
   SetupBluetoothModule();
   Serial.begin(9600);
 
-  // TODO: We should define these as functions and not lambdas because I think these get 
-  // destroyed once the setup function exits and that will break everything
-  // register the commands with the command handler
-  commandHandler.RegisterCommand(Commands::BoardState, [](uint32_t * /*args*/, uint32_t /*argsLength*/){
-    printBoardState();
-    return CommandHandler::CommandStatus::SUCCESS;
-  });
-
-  // create a lambda function to handle the ping command which calls GlobalPrint::Println("!" + String(Commands::PING) + ";");
-  commandHandler.RegisterCommand(Commands::PING, [](uint32_t * /*args*/, uint32_t /*argsLength*/){
-    GlobalPrint::Println("!" + String(Commands::PING) + ";");
-    return CommandHandler::CommandStatus::SUCCESS;
-  });
-
-  commandHandler.RegisterCommand(Commands::SetStackColors, [](uint32_t * args, uint32_t argsLength){
-    GlobalPrint::Println("!2;");
-    animator.isEnabled = false;
-    V3D<uint32_t> black{};
-    boardManager.FillColor(black);
-    SetStackColor(reinterpret_cast<uint32_t *>(args), argsLength);
-    return CommandHandler::CommandStatus::SUCCESS;
-  });
-
-  commandHandler.RegisterCommand(Commands::GoToIdle, [](uint32_t * /*args*/, uint32_t /*argsLength*/){
-    GlobalPrint::Println("!3;");
-    animator.isEnabled = true;
-    return CommandHandler::CommandStatus::SUCCESS;
-  });
-
-
+  // Register all of our commands with the command handler
+  commandHandler.RegisterCommand(Commands::BoardState, BoardStateCommandHandler);
+  commandHandler.RegisterCommand(Commands::PING, PingCommandHandler);
+  commandHandler.RegisterCommand(Commands::SetStackColors, SetColorCommandHandler);
+  commandHandler.RegisterCommand(Commands::GoToIdle, GoToIdleCommandHandler);
 
   Serial.println("Configuring communication methods");
   serialMessage.Init(9600);
