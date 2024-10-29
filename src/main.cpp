@@ -15,6 +15,7 @@
 #include "BluetoothSerial.h"
 #include "SerialMessage.h"
 #include "GlobalPrint.h"
+#include "CommandHandler.h"
 
 #include "BoardManager.h"
 #include "BoardDriver.h"
@@ -35,6 +36,8 @@ std::array<std::vector<AnimationFrame>*, 2> animations = {
   &RisingCubes::rising,
   &RotatingCubes::rotating,
 };
+
+CommandHandler commandHandler{};
 
 // BluetoothSerial SerialBT;
 // BluetoothSerialMessage serialMessageBT(&SerialBT);
@@ -73,7 +76,6 @@ void SetupBluetoothModule(){
   delay(100);
 }
 
-
 void printBoardState(){
   GlobalPrint::Print("!0,");
   String boardString;
@@ -82,62 +84,62 @@ void printBoardState(){
   GlobalPrint::Println(";");
 }
 
-void SetStackColor(uint32_t * args, int argsLength){
-  uint32_t stackNum = args[1];
+void SetStackColor(uint32_t * args, uint32_t argsLength){
+  uint32_t stackNum = args[0];
   uint32_t X_COORD{stackNum};
   while(X_COORD > BOARD_DIMENSIONS.x - 1){
     X_COORD -= BOARD_DIMENSIONS.x;
   }
   uint32_t Y_COORD{(stackNum - X_COORD) / BOARD_DIMENSIONS.y};
+  Serial.println("StackNum: " + String(stackNum));
+  Serial.println("X: " + String(X_COORD) + " Y: " + String(Y_COORD));
+  uint32_t numColors = (argsLength - 1) / 3;
 
-  uint32_t numColors = (argsLength - 2) / 3;
+  // nothing to do if no colors were given
+  if(numColors == 0){
+    return;
+  }
+  
+  Serial.println("Num Colors: " + String(numColors));
   V3D<uint32_t> colors[numColors];
   
   for(int i = 0; i < numColors; i++){
-    uint32_t red = args[2 + (i * 3)];
-    uint32_t green = args[3 + (i * 3)];
-    uint32_t blue = args[4 + (i * 3)];
+    uint32_t red = args[1 + (i * 3)];
+    uint32_t green = args[2 + (i * 3)];
+    uint32_t blue = args[3 + (i * 3)];
     colors[i] = V3D<uint32_t>{red, green, blue};
+    Serial.println("Color: " + String(red) + "," + String(green) + "," + String(blue));
   }
   boardManager.SetColumnColors(V3D<uint32_t>{X_COORD, Y_COORD, BOARD_TYPES::PLANE_NORMAL::Z}, colors, numColors);
 }
 
-void parseData(Message<SERIAL_CHAR_LENGTH, SERIAL_ARG_LENGTH> &message){
-  int32_t * args{message.GetArgs()};
-  uint32_t argsLength{message.GetPopulatedArgs()};
-  uint32_t command = args[0];
-  switch(command){
-    case Commands::BoardState:{
-      printBoardState();
-      break;
-    }
-    case Commands::PING:{
-      GlobalPrint::Println("!" + String(Commands::PING) + ";");
-      boardManager.PrintColorState();
-      break;
-    }
-    case Commands::SetStackColors:{
-      GlobalPrint::Println("!2;");
-      animator.isEnabled = false;
-      V3D<uint32_t> black{};
-      boardManager.FillColor(black);
-      SetStackColor(reinterpret_cast<uint32_t *>(args), argsLength);
-      break;
-    }
-    case Commands::GoToIdle:{
-      GlobalPrint::Println("!3;");
-      animator.isEnabled = true;
-      break;
-    }
-    default:{
-      GlobalPrint::Println("INVALID COMMAND");
-      break;
-    }
-  }
-
-  // now that we have run the command we can clear the data for the next command.
-  serialMessage.ClearNewData();
+// command handling functions
+CommandHandler::CommandStatus BoardStateCommandHandler(uint32_t * /*args*/, uint32_t /*argsLength*/){
+  printBoardState();
+  return CommandHandler::CommandStatus::SUCCESS;
 }
+
+CommandHandler::CommandStatus PingCommandHandler(uint32_t * /*args*/, uint32_t /*argsLength*/){
+  GlobalPrint::Println("!" + String(Commands::PING) + ";");
+  return CommandHandler::CommandStatus::SUCCESS;
+}
+
+CommandHandler::CommandStatus SetColorCommandHandler(uint32_t * args, uint32_t argsLength){
+  GlobalPrint::Println("!2;");
+  animator.isEnabled = false;
+  V3D<uint32_t> black{};
+  boardManager.FillColor(black);
+  SetStackColor(args, argsLength);
+  return CommandHandler::CommandStatus::SUCCESS;
+}
+
+CommandHandler::CommandStatus GoToIdleCommandHandler(uint32_t * /*args*/, uint32_t /*argsLength*/){
+  GlobalPrint::Println("!3;");
+  animator.isEnabled = true;
+  return CommandHandler::CommandStatus::SUCCESS;
+}
+
+
 
 // --------------------------------------------------
 // ----------------- FREERTOS TASKS -----------------
@@ -148,12 +150,14 @@ void UpdateCommunication(void * params){
     // DO serial processing
     serialMessage.Update();
     if(serialMessage.IsNewData()){
-      parseData(serialMessage);
+      // We reinterpret cast the args to a uint32_t pointer because we know that the args will always be positive
+      commandHandler.ProcessCommand(reinterpret_cast<uint32_t *>(serialMessage.GetArgs()), serialMessage.GetPopulatedArgs());
+      serialMessage.ClearNewData();
     }
     // serialMessageBT.Update();
     // if(serialMessageBT.IsNewData()){
-    //   parseData(serialMessageBT.GetArgs(), serialMessageBT.GetArgsLength());
-    //   serialMessageBT.ClearNewData();
+    //   commandHandler.ProcessCommand(reinterpret_cast<uint32_t *>(serialMessage.GetArgs()), serialMessage.GetPopulatedArgs());
+    //   serialMessage.ClearNewData();
     // }
     vTaskDelay(3);
   }
@@ -213,6 +217,12 @@ void setup() {
   Serial.println("Configuring Bluetooth Adapter");
   SetupBluetoothModule();
   Serial.begin(9600);
+
+  // Register all of our commands with the command handler
+  commandHandler.RegisterCommand(Commands::BoardState, BoardStateCommandHandler);
+  commandHandler.RegisterCommand(Commands::PING, PingCommandHandler);
+  commandHandler.RegisterCommand(Commands::SetStackColors, SetColorCommandHandler);
+  commandHandler.RegisterCommand(Commands::GoToIdle, GoToIdleCommandHandler);
 
   Serial.println("Configuring communication methods");
   serialMessage.Init(9600);
