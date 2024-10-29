@@ -85,21 +85,30 @@ void printBoardState(){
 }
 
 void SetStackColor(uint32_t * args, uint32_t argsLength){
-  uint32_t stackNum = args[1];
+  uint32_t stackNum = args[0];
   uint32_t X_COORD{stackNum};
   while(X_COORD > BOARD_DIMENSIONS.x - 1){
     X_COORD -= BOARD_DIMENSIONS.x;
   }
   uint32_t Y_COORD{(stackNum - X_COORD) / BOARD_DIMENSIONS.y};
+  Serial.println("StackNum: " + String(stackNum));
+  Serial.println("X: " + String(X_COORD) + " Y: " + String(Y_COORD));
+  uint32_t numColors = (argsLength - 1) / 3;
 
-  uint32_t numColors = (argsLength - 2) / 3;
+  // nothing to do if no colors were given
+  if(numColors == 0){
+    return;
+  }
+  
+  Serial.println("Num Colors: " + String(numColors));
   V3D<uint32_t> colors[numColors];
   
   for(int i = 0; i < numColors; i++){
-    uint32_t red = args[2 + (i * 3)];
-    uint32_t green = args[3 + (i * 3)];
-    uint32_t blue = args[4 + (i * 3)];
+    uint32_t red = args[1 + (i * 3)];
+    uint32_t green = args[2 + (i * 3)];
+    uint32_t blue = args[3 + (i * 3)];
     colors[i] = V3D<uint32_t>{red, green, blue};
+    Serial.println("Color: " + String(red) + "," + String(green) + "," + String(blue));
   }
   boardManager.SetColumnColors(V3D<uint32_t>{X_COORD, Y_COORD, BOARD_TYPES::PLANE_NORMAL::Z}, colors, numColors);
 }
@@ -120,7 +129,7 @@ CommandHandler::CommandStatus SetColorCommandHandler(uint32_t * args, uint32_t a
   animator.isEnabled = false;
   V3D<uint32_t> black{};
   boardManager.FillColor(black);
-  SetStackColor(reinterpret_cast<uint32_t *>(args), argsLength);
+  SetStackColor(args, argsLength);
   return CommandHandler::CommandStatus::SUCCESS;
 }
 
