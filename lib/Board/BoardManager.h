@@ -133,7 +133,10 @@ void BoardManager<BOARD_DIMS>::Update(){
             // create a cube slice array buffer
             BOARD_TYPES::Cube* sliceBuffer[BOARD_DIMS.z];
             // have the board slice get read into our buffer
-            this->board.SliceBoard(sliceVector, sliceBuffer);
+            uint32_t sliceSize = this->board.SliceBoard(sliceVector, sliceBuffer);
+            if(sliceSize < BOARD_DIMS.z){
+                return;
+            }
             // send the board slice to the driver to update its LED colors
             this->driver.UpdateStackLEDs(stackIndex, sliceBuffer, BOARD_DIMS.z);
         }
@@ -146,9 +149,14 @@ void BoardManager<BOARD_DIMS>::updateStackColors(const V3D<uint32_t> &column){
     V3D<uint32_t> sliceVector{column.x, column.y, BOARD_TYPES::Z};
     // create a buffer for slice board to write the cube slice into
     BOARD_TYPES::Cube * cubeSlice[BOARD_DIMS.z];
-    this->board.SliceBoard(column, cubeSlice);
+    uint32_t sliceSize = this->board.SliceBoard(column, cubeSlice);
 
     uint32_t numCubes{this->getColumnHeight(static_cast<BOARD_TYPES::PLANE_NORMAL>(column.z))};
+
+    if(sliceSize < numCubes){
+        return;
+    }
+
     this->driver.UpdateStackLEDs(BOARD_DIMS.x, cubeSlice, numCubes);
 }
 
@@ -168,6 +176,11 @@ void BoardManager<BOARD_DIMS>::SetColumnColors(const V3D<uint32_t> &column, cons
     uint32_t sliceLength{this->board.SliceBoard(column, slicedBoard)};
 
     uint32_t maxIndex{std::min(numColors, columnHeight)};
+
+    if(sliceLength < maxIndex){
+        return;
+    }
+    
     for(uint32_t i = 0; i < maxIndex; i++){
         slicedBoard[i]->color = color[i];
     }
